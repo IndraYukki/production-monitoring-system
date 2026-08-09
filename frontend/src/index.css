@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* =========================================================
+   PRODUCTION MONITORING SYSTEM
+   DESIGN SYSTEM v1
+   ========================================================= */
+
+/* =========================================================
+   LIGHT MODE — DEFAULT
+   ========================================================= */
+
+:root {
+  /* Core Palette */
+  --background: #ccd5de;
+  --card: #e8eef4;
+  --card-secondary: #dbe4ec;
+  --foreground: #162232;
+  --accent: #1d4ed8;
+
+  /* Supporting UI */
+  --border: #8fa8be;
+  --input: #ffffff;
+
+  /* Text */
+  --muted: #4a6478;
+
+  /* Status */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #38bdf8;
+  --inactive: #94a3b8;
+}
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+.dark {
+  /* Core Palette */
+  --background: #0f172a;
+  --card: #1e293b;
+  --card-secondary: #25344c;
+  --foreground: #e4e2f0;
+  --accent: #1d4ed8;
+
+  /* Supporting UI */
+  --border: #334155;
+  --input: #25344c;
+
+  /* Text */
+  --muted: #94a3b8;
+
+  /* Status */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #38bdf8;
+  --inactive: #94a3b8;
+}
+
+/* =========================================================
+   TAILWIND THEME TOKENS
+   ========================================================= */
+
+@theme {
+  /* Core */
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-card-secondary: var(--card-secondary);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+
+  /* UI */
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-muted: var(--muted);
+
+  /* Status */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-inactive: var(--inactive);
+}
