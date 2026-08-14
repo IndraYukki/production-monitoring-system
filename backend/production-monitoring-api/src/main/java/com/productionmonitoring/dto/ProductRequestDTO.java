@@ -18,23 +18,30 @@ public class ProductRequestDTO {
     private String color;
 
     @NotNull
-    private Double cycleTime = 0.0;
+    private Integer cycleTime = 0;
 
     @NotNull
     private Integer cavity = 0;
 
-    private Double takeTime = 0.0;
+    private Integer takeTime = 0;
 
     @NotNull
     private Long customerId;
 
-    public Double getCycleTime() {
-        return cycleTime != null ? cycleTime: 0.0;
+    private String status;
+
+    public Integer getCycleTime() {
+        return cycleTime != null ? cycleTime: 0;
     }
     public Integer getCavity() {
         return cavity != null ? cavity: 0;
     }
-    public Double getTakeTime() {
-        return takeTime != null ? takeTime: 0.0;
+    public Integer getTakeTime() {
+        return takeTime != null ? takeTime: 0;
+    }
+    public String getStatus() {
+        return status != null && !status.isBlank()
+                ? status
+                : "ACTIVE";
     }
 }

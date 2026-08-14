@@ -9,8 +9,8 @@ export default defineConfig({
     
   ],
   server: {
-    host: true, // <-- Tambahkan baris ini agar Vite menerima akses dari IP lokal/HP
-    port: 5173,  // Opsional, memastikan port tetap 5173
+    host: true, // Mengizinkan akses dari alamat IP lokal
+    port: 5173,  // Menentukan port server
     allowedHosts: true
   }
 })

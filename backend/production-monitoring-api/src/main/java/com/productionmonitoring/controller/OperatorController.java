@@ -5,6 +5,7 @@ import com.productionmonitoring.exception.ResourceNotFoundException;
 import com.productionmonitoring.repository.OperatorRepository;
 import com.productionmonitoring.service.OperatorService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,34 +31,36 @@ public class OperatorController {
     }
 
     @GetMapping
-    public List<Operator> lihatSemuaOperator() {
-        return operatorRepository.findAll();
+    public Page<Operator> lihatSemua(
+            @RequestParam(defaultValue = "0") int halaman,
+            @RequestParam(defaultValue = "10") int jumlah,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String groub
+    ) {
+        return operatorService.lihatOperator(
+                halaman,
+                jumlah,
+                keyword,
+                groub
+        );
     }
 
     @PostMapping
     public Operator tambahOperator(@Valid @RequestBody Operator inputUser) {
-        return operatorRepository.save(inputUser);
+        return operatorService.tambahOperator(inputUser);
     }
 
 
     @PutMapping("/{id}")
-    public Operator editOperator(@PathVariable Long id, @Valid @RequestBody Operator inputUser) {
-        Operator operator = operatorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Operator tidak ditemukan"));
+    public Operator editOperator(
+            @PathVariable Long id,
+            @Valid @RequestBody Operator input) {
 
-        operator.setName(inputUser.getName());
-        operator.setNik(inputUser.getNik());
-        operator.setGroub(inputUser.getGroub());
-        return operatorRepository.save(operator);
+        return operatorService.editOperator(id, input);
     }
 
     @DeleteMapping("/{id}")
     public String hapusOperator(@PathVariable Long id) {
-        Operator operator = operatorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Operator tidak ditemukan"));
-
-        String namaOperator = operator.getName();
-        operatorRepository.delete(operator);
-        return "Operator " + namaOperator + " berhasil dihapus";
+        return operatorService.hapusOperator(id);
     }
 }

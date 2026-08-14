@@ -2,6 +2,7 @@ function ProductionDetailModal({
   open,
   onClose,
   production,
+  onDelete,
 }) {
   if (!open || !production) return null
 
@@ -284,6 +285,13 @@ function ProductionDetailModal({
         <div className="border-t border-border px-6 py-4">
 
           <div className="flex justify-end">
+             <button
+                type="button"
+                onClick={() => onDelete(production)}
+                className="rounded-xl bg-danger px-6 py-3 font-semibold text-white transition hover:opacity-90"
+              >
+                Delete
+              </button>
 
             <button
               onClick={onClose}

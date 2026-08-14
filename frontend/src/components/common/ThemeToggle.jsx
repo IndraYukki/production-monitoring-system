@@ -3,11 +3,15 @@ import { useEffect, useState } from 'react'
 
 function ThemeToggle() {
   const [isDark, setIsDark] = useState(() => {
-    return document.documentElement.classList.contains('dark')
+    // Baca dari localStorage saat pertama load
+    const saved = localStorage.getItem('theme')
+    return saved === 'dark'
   })
 
   useEffect(() => {
+    // Toggle class DAN simpan ke localStorage setiap berubah
     document.documentElement.classList.toggle('dark', isDark)
+    localStorage.setItem('theme', isDark ? 'dark' : 'light')
   }, [isDark])
 
   return (

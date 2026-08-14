@@ -27,15 +27,17 @@ public class Products {
 
     @NotNull(message = "Cycle Time tidak boleh kosong")
     @Column(name = "cycle_time")
-    private Double cycleTime;
+    private Integer cycleTime;
 
     @NotNull(message = "Cavity tidak boleh kosong")
     private Integer cavity;
 
     @Column(name = "take_time")
-    private Double takeTime;
+    private Integer takeTime;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
+
+    private String status;
 }

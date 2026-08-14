@@ -52,7 +52,7 @@ public class ProductionExcelExporter {
             double targetPpic =
                     (3600 / production.getProduct().getCycleTime())
                             * production.getProduct().getCavity()
-                            * (production.getUptimeMc() / 60.0);
+                            * (production.getUptimeMc() / 60);
 
             Row row = sheet.createRow(rowNumber++);
             row.createCell(0).setCellValue(

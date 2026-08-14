@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface ProductionRepository
         extends JpaRepository<Production, Long>,
         JpaSpecificationExecutor<Production> {
+
 }

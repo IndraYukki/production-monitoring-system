@@ -15,6 +15,7 @@ public class ProductionResponseDTO {
     private Long productId;
     private String partNo;
     private String partName;
+    private String status;
     private Long machineId;
     private String machineName;
     private String shift;
@@ -30,9 +31,9 @@ public class ProductionResponseDTO {
     private Integer uptimeMc;
     private Integer qtyOk = 0;
     private Integer qtyWip = 0;
-    private Double cycleTime = 0.0;
+    private Integer cycleTime = 0;
     private Integer cavity = 0;
-    private Double takeTime = 0.0;
+    private Integer takeTime = 0;
     private LocalDate productionLot;
     private Timestamp createdAt;
     private String remark = "";
@@ -53,16 +54,16 @@ public class ProductionResponseDTO {
         return qtyWip != null ? qtyWip : 0;
     }
 
-    public Double getCycleTime() {
-        return cycleTime != null ? cycleTime : 0.0;
+    public Integer getCycleTime() {
+        return cycleTime != null ? cycleTime : 0;
     }
 
     public Integer getCavity() {
         return cavity != null ? cavity : 0;
     }
 
-    public Double getTakeTime() {
-        return takeTime != null ? takeTime : 0.0;
+    public Integer getTakeTime() {
+        return takeTime != null ? takeTime : 0;
     }
     public String getRemark() {
         return remark != null ? remark : "";

@@ -1,6 +1,6 @@
 function ProductionRawTableSkeleton() {
   return (
-    <tbody className="divide-y divide-border">
+    <>
       {Array.from({ length: 10 }).map((_, index) => (
         <tr key={index}>
           
@@ -74,7 +74,7 @@ function ProductionRawTableSkeleton() {
 
         </tr>
       ))}
-    </tbody>
+    </>
   )
 }
 

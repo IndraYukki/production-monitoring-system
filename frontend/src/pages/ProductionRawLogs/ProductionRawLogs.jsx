@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import ProductionRawFilter from './ProductionRawFilter'
 import ProductionRawTable from './ProductionRawTable'
-import { getProductionLogs, exportProductionExcel } from '../../services/productionService'
+import { getProductionLogs, exportProductionExcel, deleteProduction } from '../../services/productionService'
 import { getCustomers } from '../../services/customerService'
 import { getMachines } from '../../services/machineService'
 import ProductionDetailModal from '../../components/production/ProductionDetailModal'
@@ -193,6 +193,38 @@ function ProductionRawLogs() {
       setOpenDetailModal(false)
       setSelectedProduction(null)
     };
+    
+    const handleDeleteProduction = async (production) => {
+
+          const confirmDelete = window.confirm(
+          `Apakah Anda yakin ingin menghapus production ${production.partName}?`
+        )
+
+      if (!confirmDelete) {
+        return handleCloseDetail()
+      }
+      try {
+
+        console.log('Confirm Delete:', confirmDelete)
+
+        await deleteProduction(production.id)
+
+        alert('Production berhasil dihapus')
+        
+
+        handleCloseDetail()
+        fetchProductionLogs()
+      } catch (error) {
+        console.error('Gagal menghapus production:', error)
+
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          'Gagal menghapus production'
+
+        alert(errorMessage)
+      }
+    }
 
 
   return (
@@ -234,6 +266,7 @@ function ProductionRawLogs() {
             open={openDetailModal}
             onClose={handleCloseDetail}
             production={selectedProduction}
+            onDelete={handleDeleteProduction}
         />
 
 

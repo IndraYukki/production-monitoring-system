@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="en">
   <head>
+
+    <script>
+      const theme = localStorage.getItem('theme')
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark')
+      }
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./src/gambar/logo/logo_HTP.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

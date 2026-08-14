@@ -5,6 +5,8 @@ import {
   X,
   LayoutDashboard,
   ClipboardList,
+  FileInput,
+  ChartColumnDecreasing
 } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import logoHTP from '../../gambar/logo/logo_HTP.png'
@@ -119,7 +121,7 @@ function Sidebar() {
             }
           >
 
-            <LayoutDashboard size={20} />
+            <FileInput size={20} />
 
             <span>
               Production Input
@@ -144,10 +146,61 @@ function Sidebar() {
             }
           >
 
-            <ClipboardList size={20} />
+            <ChartColumnDecreasing size={20} />
 
             <span>
               Production Logs
+            </span>
+
+          </NavLink>
+
+
+
+          <NavLink
+            to="/product"
+            onClick={closeSidebar}
+            className={({ isActive }) =>
+              `
+                flex items-center gap-3 rounded-xl px-4 py-3
+                text-sm font-medium transition
+                ${
+                  isActive
+                    ? 'bg-info/10 text-info'
+                    : 'text-muted hover:bg-card-secondary hover:text-foreground'
+                }
+              `
+            }
+          >
+
+            <ClipboardList size={20} />
+
+            <span>
+              Detail Product
+            </span>
+
+          </NavLink>
+
+
+          <NavLink
+            to="/Operator"
+            onClick={closeSidebar}
+            className={({ isActive }) =>
+              `
+                flex items-center gap-3 rounded-xl px-4 py-3
+                text-sm font-medium transition
+                ${
+                  isActive
+                    ? 'bg-info/10 text-info'
+                    : 'text-muted hover:bg-card-secondary hover:text-foreground'
+                }
+              `
+            }
+          >
+
+            <ClipboardList size={20} />
+
+            <span>
+              Data Operator
             </span>
 
           </NavLink>

@@ -1,5 +1,6 @@
 package com.productionmonitoring.controller;
 
+import com.productionmonitoring.dto.ProductFilterDTO;
 import com.productionmonitoring.dto.ProductRequestDTO;
 import com.productionmonitoring.dto.ProductResponseDTO;
 import com.productionmonitoring.service.ProductService;
@@ -21,8 +22,25 @@ public class ProductController {
     }
 
     @GetMapping
-    public Page<ProductResponseDTO> lihatSemuaProduct(@RequestParam(defaultValue = "0") int halaman,@RequestParam(defaultValue = "10") int jumlah) {
-        return productService.lihatSemuaProduct(halaman, jumlah);
+    public Page<ProductResponseDTO> lihatSemuaProduct(
+            @RequestParam(defaultValue = "0") int halaman,
+            @RequestParam(defaultValue = "10") int jumlah,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(required = false) String status
+    ) {
+
+        ProductFilterDTO filter = new ProductFilterDTO();
+
+        filter.setKeyword(keyword);
+        filter.setCustomerId(customerId);
+        filter.setStatus(status);
+
+        return productService.lihatSemuaProduct(
+                halaman,
+                jumlah,
+                filter
+        );
     }
 
     @PostMapping

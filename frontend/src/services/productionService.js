@@ -53,3 +53,8 @@ export const exportProductionExcel = async ({
 
   return response
 }
+
+export const deleteProduction = async (id) => {
+  const response = await api.delete(`/production/${id}`)
+  return response.data
+}

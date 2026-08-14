@@ -1,5 +1,6 @@
 package com.productionmonitoring.service;
 
+import com.productionmonitoring.dto.ProductFilterDTO;
 import com.productionmonitoring.dto.ProductRequestDTO;
 import com.productionmonitoring.dto.ProductResponseDTO;
 import com.productionmonitoring.entity.Customer;
@@ -7,9 +8,11 @@ import com.productionmonitoring.entity.Products;
 import com.productionmonitoring.exception.ResourceNotFoundException;
 import com.productionmonitoring.repository.CustomerRepository;
 import com.productionmonitoring.repository.ProductRepository;
+import com.productionmonitoring.specification.ProductSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,9 +31,23 @@ public class ProductService {
         this.customerRepository = customerRepository;
     }
 
-    public Page<ProductResponseDTO> lihatSemuaProduct(int halamanKe, int jumlahData) {
-        Pageable perHalaman = PageRequest.of(halamanKe, jumlahData);
-        return productRepository.findAll(perHalaman).map(this::toResponseDTO);
+    public Page<ProductResponseDTO> lihatSemuaProduct(
+            int halamanKe,
+            int jumlahData,
+            ProductFilterDTO filter
+    ) {
+        Pageable perHalaman = PageRequest.of(halamanKe, jumlahData, Sort.by(Sort.Direction.ASC, "id"));
+
+        return productRepository
+                .findAll(
+                        ProductSpecification.filter(
+                                filter.getKeyword(),
+                                filter.getCustomerId(),
+                                filter.getStatus()
+                        ),
+                        perHalaman
+                )
+                .map(this::toResponseDTO);
     }
 
     public ProductResponseDTO tambahProduct(ProductRequestDTO inputUser) {
@@ -47,6 +64,7 @@ public class ProductService {
         product.setCavity(inputUser.getCavity());
         product.setTakeTime(inputUser.getTakeTime());
         product.setCustomer(customer);
+        product.setStatus("ACTIVE");
 
         return toResponseDTO(productRepository.save(product));
     }
@@ -62,6 +80,7 @@ public class ProductService {
         dto.setCycleTime(product.getCycleTime());
         dto.setCavity(product.getCavity());
         dto.setTakeTime(product.getTakeTime());
+        dto.setStatus(product.getStatus());
 
         if (product.getCustomer() != null) {
             dto.setCustomerId(product.getCustomer().getId());
@@ -85,6 +104,7 @@ public class ProductService {
         product.setCavity(inputUser.getCavity());
         product.setTakeTime(inputUser.getTakeTime());
         product.setCustomer(customer);
+        product.setStatus(inputUser.getStatus());
 
         return toResponseDTO(productRepository.save(product));
     }
@@ -104,7 +124,8 @@ public class ProductService {
         return productRepository
                 .findByPartNoContainingIgnoreCaseOrPartNameContainingIgnoreCase(
                         keyword,
-                        keyword
+                        keyword,
+                        Sort.by(Sort.Direction.ASC, "id")
                 )
                 .stream()
                 .map(this::toProductResponseDTO)
@@ -121,6 +142,7 @@ public class ProductService {
         dto.setCycleTime(product.getCycleTime());
         dto.setCavity(product.getCavity());
         dto.setTakeTime(product.getTakeTime());
+        dto.setStatus(product.getStatus());
 
         if (product.getCustomer() != null) {
             dto.setCustomerId(product.getCustomer().getId());

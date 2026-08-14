@@ -14,13 +14,11 @@ import com.productionmonitoring.repository.NgDefectRepository;
 import com.productionmonitoring.repository.OperatorRepository;
 import com.productionmonitoring.repository.ProductRepository;
 import com.productionmonitoring.repository.ProductionRepository;
-import com.productionmonitoring.specification.ProductionSpecification;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import com.productionmonitoring.dto.ProductionFilterDTO;
@@ -62,8 +60,9 @@ public class ProductionService {
             ProductionFilterDTO filter,
             int halamanKe,
             int jumlahData
+
     ) {
-        Pageable perHalaman = PageRequest.of(halamanKe, jumlahData);
+        Pageable perHalaman = PageRequest.of(halamanKe, jumlahData, Sort.by(Sort.Direction.DESC, "createdAt"));
         Specification<Production> specification =
                 specificationBuilder.build(filter);
 
@@ -198,6 +197,7 @@ public class ProductionService {
             dto.setCycleTime(production.getProduct().getCycleTime());
             dto.setCavity(production.getProduct().getCavity());
             dto.setTakeTime(production.getProduct().getTakeTime());
+            dto.setStatus(production.getProduct().getStatus());
             if (production.getProduct().getCustomer() != null) {
                 dto.setCustomerId(
                         production.getProduct().getCustomer().getId()
