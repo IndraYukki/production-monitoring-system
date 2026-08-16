@@ -1,6 +1,6 @@
 import Sidebar from './components/common/Sidebar'
 import NotFoundPage from './pages/NotFoundPage'
-import ProductManagement from './pages/product/productManagement'
+import ProductManagement from './pages/product/ProductManagement'
 import AddProduction from './pages/productionAdd/AddProduction'
 import ProductionRawLogs from './pages/ProductionRawLogs/ProductionRawLogs'
 import OperatorManagement from './pages/operator/OperatorManagement'
