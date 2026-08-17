@@ -47,7 +47,7 @@ export default function SummaryCards({ cardsData, loading }) {
       <StatCard
         label="Achievement"
         value={loading ? '...' : `${cardsData?.totalAchieve ?? 0}%`}
-        detail="Rata-rata pencapaian"
+        detail="Total Pencapaian"
         icon={CheckCircle2}
         tone="green"
       />
