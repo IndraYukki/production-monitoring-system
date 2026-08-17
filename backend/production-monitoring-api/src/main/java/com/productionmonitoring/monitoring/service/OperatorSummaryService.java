@@ -82,6 +82,7 @@ public class OperatorSummaryService {
             if (productions.isEmpty()) continue;
 
             int totalOk = 0, totalWip = 0, totalOutput = 0, totalTarget = 0;
+            int totalLogs = 0;
 
             for (Production p : productions) {
                 if (p.getProduct() == null || p.getMachine() == null) continue;
@@ -89,19 +90,12 @@ public class OperatorSummaryService {
                 totalWip    += p.getQtyWip() != null ? p.getQtyWip() : 0;
                 totalOutput += hitungOutput(p);
                 totalTarget += hitungTarget(p);
+                totalLogs++;
             }
 
             int achievePercent = totalTarget > 0
                     ? (int) Math.round((double) totalOutput / totalTarget * 100)
                     : 0;
-
-            int totalLogs = 0;
-
-            for (Production p : productions) {
-                if (p.getProduct() == null || p.getMachine() == null) continue;
-                // ... yang sudah ada ...
-                totalLogs++;
-            }
 
             OperatorSummaryRowDTO row = new OperatorSummaryRowDTO();
             row.setOperatorId(operator.getId());
@@ -170,7 +164,7 @@ public class OperatorSummaryService {
         int cavity  = p.getProduct().getCavity()  != null ? p.getProduct().getCavity()  : 0;
         int uptime  = p.getUptimeMc()             != null ? p.getUptimeMc()             : 0;
 
-        return (int) Math.ceil((double) 3600 / waktu * cavity * uptime);
+        return (int) Math.ceil((double) 3600 / waktu * cavity * (uptime / 60.0));
     }
 
     private boolean operatorMatchGroub(Production p, String groub) {
