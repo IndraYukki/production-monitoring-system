@@ -40,7 +40,7 @@ function MachineAutocomplete({ value, onChange }) {
     .filter((machine) =>
       machine.name.toLowerCase().includes(keyword.toLowerCase())
     )
-    .slice(0, 5)
+    .slice()
 
   useEffect(() => {
     if (!value) {

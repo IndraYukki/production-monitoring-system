@@ -152,6 +152,7 @@ function OperatorModal({
                         required
                         className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-info"
                         >
+                        <option value="" disabled>-- Pilih Group --</option>
                         <option value="A">A</option>
                         <option value="B">B</option>
                         <option value="C">C</option>

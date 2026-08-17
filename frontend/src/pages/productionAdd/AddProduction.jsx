@@ -136,6 +136,8 @@ function AddProduction() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto w-full max-w-362.5 px-4 py-6 sm:px-6 md:py-8 lg:px-8">
+
+
       <form onSubmit={handleSubmit}>
 
         <ProductionInfo

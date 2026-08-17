@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { searchOperators } from '../../services/operatorService'
 
-function OperatorAutoComplete({ value, onChange, onSelect, isSelected }) {
+function OperatorAutoComplete({ value, onChange, onSelect }) {
   const [search, setSearch] = useState(value || '')
   
   useEffect(() => {
@@ -12,6 +12,8 @@ function OperatorAutoComplete({ value, onChange, onSelect, isSelected }) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSelecting, setIsSelecting] = useState(false)
+  const [isSelected, setIsSelected] = useState(false)
+
 
   const containerRef = useRef(null)
 
@@ -26,6 +28,7 @@ function OperatorAutoComplete({ value, onChange, onSelect, isSelected }) {
     if (!search.trim()) {
       setOperators([])
       setIsOpen(false)
+      setIsSelected(false)
       return
     }
 
@@ -71,7 +74,9 @@ function OperatorAutoComplete({ value, onChange, onSelect, isSelected }) {
     setSearch(operator.name)
     setIsOpen(false)
     onSelect(operator)
+    setIsSelected(true)
   }
+
 
 
   return (
@@ -87,11 +92,11 @@ function OperatorAutoComplete({ value, onChange, onSelect, isSelected }) {
         }}
         placeholder="Search operator..."
         autoComplete="off"
-        className={`w-full rounded-xl border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted ${
-            isSelected
-              ? 'bg-info focus:border-success'
-              : 'border-border focus:border-warning'
-          }`}
+        className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition placeholder:text-muted ${
+          isSelected
+            ? 'border-accent bg-accent/10 text-success'
+            : 'border-border bg-card-secondary text-foreground'
+        }`}
       />
 
       {isOpen &&  (
@@ -121,7 +126,7 @@ function OperatorAutoComplete({ value, onChange, onSelect, isSelected }) {
                 </p>
 
                 <p className="mt-1 text-xs text-muted">
-                  NIK: {operator.nik || '-'} · Group: {operator.groub || '-'}
+                  Group: {operator.groub || '-'}
                 </p>
               </button>
             ))}

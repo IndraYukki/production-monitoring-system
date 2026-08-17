@@ -124,6 +124,54 @@ function Sidebar() {
             <FileInput size={20} />
 
             <span>
+              Dashoboard
+            </span>
+
+          </NavLink>
+
+          <NavLink
+            to="/operator-summary"
+            onClick={closeSidebar}
+            className={({ isActive }) =>
+              `
+                flex items-center gap-3 rounded-xl px-4 py-3
+                text-sm font-medium transition
+                ${
+                  isActive
+                    ? 'bg-info/10 text-info'
+                    : 'text-muted hover:bg-card-secondary hover:text-foreground'
+                }
+              `
+            }
+          >
+
+            <FileInput size={20} />
+
+            <span>
+              Summary Operator
+            </span>
+
+          </NavLink>
+
+          <NavLink
+            to="/add-production"
+            onClick={closeSidebar}
+            className={({ isActive }) =>
+              `
+                flex items-center gap-3 rounded-xl px-4 py-3
+                text-sm font-medium transition
+                ${
+                  isActive
+                    ? 'bg-info/10 text-info'
+                    : 'text-muted hover:bg-card-secondary hover:text-foreground'
+                }
+              `
+            }
+          >
+
+            <FileInput size={20} />
+
+            <span>
               Production Input
             </span>
 

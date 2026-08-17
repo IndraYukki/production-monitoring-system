@@ -6,6 +6,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import java.util.List;
 
 
 import java.util.List;
@@ -40,5 +43,23 @@ public interface OperatorRepository extends JpaRepository<Operator, Long> {
     List<Operator> findByNameContainingIgnoreCaseOrNikContainingIgnoreCase(
             String name,
             String nik
+    );
+
+    @Query(value = """
+    SELECT * FROM operators
+    WHERE (CAST(:keyword AS TEXT) IS NULL 
+        OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        OR LOWER(nik) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    AND (
+        CASE WHEN (CAST(:groub AS TEXT) IS NULL OR :groub = '')
+             THEN groub <> 'RESIGN'
+             ELSE groub = :groub
+        END
+    )
+    ORDER BY name ASC
+""", nativeQuery = true)
+    List<Operator> findForSummary(
+            @Param("keyword") String keyword,
+            @Param("groub") String groub
     );
 }

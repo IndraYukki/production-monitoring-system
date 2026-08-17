@@ -86,7 +86,7 @@ function ProductionRawLogs() {
           0
         )
 
-        const totalProduction = (production.qtyOk ?? 0) + totalNg
+        const totalProduction = (production.qtyOk ?? 0) + totalNg  + (production.qtyWip ?? 0)
         const uptimeHours = (production.uptimeMc ?? 0) / 60
 
         const productionTime =
@@ -96,7 +96,7 @@ function ProductionRawLogs() {
 
         const target =
           productionTime && production.cavity && uptimeHours > 0
-            ? (3600 / productionTime) * production.cavity * uptimeHours
+            ? Math.ceil((3600 / productionTime) * production.cavity * uptimeHours)
             : 0
 
         const achievement = target > 0 ? (totalProduction / target) * 100 : 0

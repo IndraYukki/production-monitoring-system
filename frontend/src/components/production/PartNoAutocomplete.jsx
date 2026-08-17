@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef} from 'react'
 import { searchProducts } from '../../services/productService'
 
 function PartNoAutocomplete({ value, onChange, onSelect }) {
@@ -42,6 +42,18 @@ function PartNoAutocomplete({ value, onChange, onSelect }) {
       fetchProducts()
     }, [search])
 
+    const containerRef = useRef(null)
+
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (containerRef.current && !containerRef.current.contains(event.target)) {
+          setIsOpen(false)
+        }
+      }
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
+
   const handleChange = (event) => {
     const value = event.target.value
 
@@ -59,7 +71,7 @@ function PartNoAutocomplete({ value, onChange, onSelect }) {
   }
 
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <label
         htmlFor="part-no"
         className="mb-2 block text-sm font-medium"

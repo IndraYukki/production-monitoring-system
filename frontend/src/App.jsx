@@ -5,6 +5,9 @@ import AddProduction from './pages/productionAdd/AddProduction'
 import ProductionRawLogs from './pages/ProductionRawLogs/ProductionRawLogs'
 import OperatorManagement from './pages/operator/OperatorManagement'
 import { Routes, Route } from 'react-router-dom'
+import SummaryOperatorManagement from './pages/summaryOperator/SummaryOperatorManagement'
+import OperatorDetailPage from './pages/summaryOperator/OperatorDetailPage'
+import DashboardLandingPage from './pages/DashboardLandingPage'
 
 function App() {
   return (
@@ -20,6 +23,23 @@ function App() {
 
           <Route
             path="/"
+            element={<DashboardLandingPage />}
+          />
+
+          
+          <Route
+            path="/operator-summary"
+            element={<SummaryOperatorManagement />}
+          />
+
+          
+          <Route
+            path="/operator-summary/:operatorId"
+            element={<OperatorDetailPage />}
+          />
+
+          <Route
+            path="/add-production"
             element={<AddProduction />}
           />
 
