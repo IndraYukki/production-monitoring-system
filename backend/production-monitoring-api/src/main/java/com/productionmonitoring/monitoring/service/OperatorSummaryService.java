@@ -50,7 +50,7 @@ public class OperatorSummaryService {
         }
 
         int achievePercent = totalTarget > 0
-                ? (int) Math.round((double) totalOutput / totalTarget * 100)
+                ? (int) Math.floor((double) totalOutput / totalTarget * 100)
                 : 0;
 
         OperatorSummaryCardDTO dto = new OperatorSummaryCardDTO();
@@ -94,7 +94,7 @@ public class OperatorSummaryService {
             }
 
             int achievePercent = totalTarget > 0
-                    ? (int) Math.round((double) totalOutput / totalTarget * 100)
+                    ? (int) Math.floor((double) totalOutput / totalTarget * 100)
                     : 0;
 
             OperatorSummaryRowDTO row = new OperatorSummaryRowDTO();
@@ -202,7 +202,7 @@ public class OperatorSummaryService {
         int output = ok + wip + ng;
         int target = hitungTarget(p);
         int achieve = target > 0
-                ? (int) Math.round((double) output / target * 100)
+                ? (int) Math.floor((double) output / target * 100)
                 : 0;
 
         dto.setQtyOk(ok);
@@ -257,7 +257,7 @@ public class OperatorSummaryService {
         }
 
         int achievePercent = totalTarget > 0
-                ? (int) Math.round((double) totalOutput / totalTarget * 100)
+                ? (int) Math.floor((double) totalOutput / totalTarget * 100)
                 : 0;
 
         OperatorDetailCardDTO dto = new OperatorDetailCardDTO();
