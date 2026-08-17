@@ -1,5 +1,5 @@
-import React from 'react'
 import { ChevronDown } from 'lucide-react'
+import DetailLogsTableSkeleton from './DetailLogsTableSkeleton'
 
 export default function DetailLogsTable({
   pageData,
@@ -41,8 +41,8 @@ export default function DetailLogsTable({
       </div>
 
       {/* Data Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[820px] text-left text-sm">
+      <div className="max-h-125 overflow-auto">
+        <table className="w-full min-w-205 text-left text-sm">
           <thead className="bg-card-secondary text-xs uppercase tracking-[0.08em] text-muted sticky top-0">
             <tr>
               <th className="px-5 py-3 font-medium">Lot Date</th>
@@ -59,11 +59,7 @@ export default function DetailLogsTable({
           </thead>
           <tbody className="divide-y divide-border">
             {loading ? (
-              <tr>
-                <td colSpan={9} className="px-5 py-8 text-center text-muted">
-                  Memuat log produksi operator...
-                </td>
-              </tr>
+              <DetailLogsTableSkeleton count={jumlah} />
             ) : pageData.content?.length === 0 ? (
               <tr>
                 <td colSpan={9} className="px-5 py-8 text-center text-muted">
@@ -125,7 +121,7 @@ export default function DetailLogsTable({
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
                           isTercapai
-                            ? 'bg-success/15 text-success'
+                            ? 'bg-accent text-success'
                             : 'bg-danger/15 text-danger'
                         }`}
                       >

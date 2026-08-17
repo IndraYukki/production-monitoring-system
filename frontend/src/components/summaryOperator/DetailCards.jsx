@@ -67,7 +67,7 @@ export default function DetailCards({ cardsData, loading }) {
       <MiniStatCard
         label="Total Output"
         value={output.toLocaleString('id-ID')}
-        detail={`OK: ${ok.toLocaleString('id-ID')} | WIP: ${wip}`}
+        detail={`OK: ${ok.toLocaleString('id-ID')} | WIP: ${wip.toLocaleString('id-ID')} | NG: ${ng.toLocaleString('id-ID')}`}
         icon={ClipboardList}
         tone="blue"
       />
@@ -81,7 +81,7 @@ export default function DetailCards({ cardsData, loading }) {
       <MiniStatCard
         label="Achievement"
         value={`${achievePercent}%`}
-        detail="Rata-rata pencapaian"
+        detail="Total pencapaian"
         icon={TrendingUp}
         tone={achievePercent >= 100 ? 'green' : 'danger'}
       />

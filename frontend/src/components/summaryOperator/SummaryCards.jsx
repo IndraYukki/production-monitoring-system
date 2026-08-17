@@ -1,4 +1,3 @@
-import React from 'react'
 import { ClipboardList, Target, CheckCircle2 } from 'lucide-react'
 
 function StatCard({ label, value, detail, icon: Icon, tone }) {

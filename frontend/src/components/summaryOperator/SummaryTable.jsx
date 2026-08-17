@@ -1,5 +1,5 @@
-import React from 'react'
 import { Search, ChevronDown, ArrowRight } from 'lucide-react'
+import SummaryTableSkeleton from './SummaryTableSkeleton'
 
 const SummaryTable = ({
   pageData,
@@ -25,7 +25,7 @@ const SummaryTable = ({
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           {/* Search Bar (hanya refresh tabel) */}
-          <div className="relative min-w-[240px]">
+          <div className="relative min-w-60">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
             <input
               type="text"
@@ -62,9 +62,9 @@ const SummaryTable = ({
       </div>
 
       {/* Data Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="bg-card-secondary text-xs uppercase tracking-[0.08em] text-muted sticky top-0">
+      <div className="max-h-125 overflow-auto">
+        <table className="w-full min-w-180 text-left text-sm">
+          <thead className="sticky top-0 z-20 bg-card-secondary text-xs uppercase tracking-[0.08em] text-muted">
             <tr>
               <th className="px-5 py-3 font-medium">Operator</th>
               <th className="px-5 py-3 font-medium">Group</th>
@@ -76,7 +76,7 @@ const SummaryTable = ({
               <th className="px-5 py-3 text-right font-medium">Detail Log</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          {/* <tbody className="divide-y divide-border">
             {loading ? (
               <tr>
                 <td colSpan={8} className="px-5 py-8 text-center text-muted">
@@ -90,7 +90,18 @@ const SummaryTable = ({
                 </td>
               </tr>
             ) : (
-              pageData.content?.map((op) => (
+              pageData.content?.map((op) => ( */}
+              <tbody className="divide-y divide-border">
+                {loading ? (
+                  <SummaryTableSkeleton count={jumlah} />
+                ) : pageData.content?.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-5 py-8 text-center text-muted">
+                      Tidak ada data operator ditemukan.
+                    </td>
+                  </tr>
+                ) : (
+                  pageData.content?.map((op) => (
                 <tr
                   key={op.operatorId}
                   onClick={() => onRowClick(op.operatorId)}

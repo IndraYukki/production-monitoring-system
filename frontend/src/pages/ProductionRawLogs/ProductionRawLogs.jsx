@@ -8,6 +8,26 @@ import ProductionDetailModal from '../../components/production/ProductionDetailM
 
 
 
+
+
+// Mengambil tanggal 1 di bulan & tahun berjalan (YYYY-MM-01)
+const getStartDateOfMonth = () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}-01`
+}
+
+// Mengambil tanggal hari ini (YYYY-MM-DD)
+const getTodayDate = () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+
 function ProductionRawLogs() {
   const [pageSize, setPageSize] = useState(10)
   const [productionPage, setProductionPage] = useState({
@@ -34,43 +54,11 @@ function ProductionRawLogs() {
     customerId: '',
     machineId: '',
     shift: '',
-    tanggalMulai: '',
-    tanggalSelesai: '',
+    tanggalMulai: getStartDateOfMonth(),
+    tanggalSelesai: getTodayDate(),
   })
 
-    useEffect(() => {
-    fetchCustomers()
-    fetchMachines()
-  }, [])
-
-  useEffect(() => {
-    fetchProductionLogs()
-  }, [page, pageSize])
-
-
-  const fetchCustomers = async () => {
-    try {
-      const data = await getCustomers()
-      setCustomers(data)
-    } catch (error) {
-      console.error('Gagal mengambil customer:', error)
-    }
-  }
-  const handlePageSizeChange = (size) => {
-    setPage(0)
-    setPageSize(Number(size))
-  }
-
-  const fetchMachines = async () => {
-    try {
-      const data = await getMachines()
-      setMachines(data)
-    } catch (error) {
-      console.error('Gagal mengambil machine:', error)
-    }
-  }
-
-  const fetchProductionLogs = async (currentFilters = filters) => {
+    const fetchProductionLogs = async (currentFilters = filters) => {
     try {
       setLoading(true)
 
@@ -125,6 +113,43 @@ function ProductionRawLogs() {
     }
   };
 
+    const fetchCustomers = async () => {
+    try {
+      const data = await getCustomers()
+      setCustomers(data)
+    } catch (error) {
+      console.error('Gagal mengambil customer:', error)
+    }
+  }
+    const fetchMachines = async () => {
+    try {
+      const data = await getMachines()
+      setMachines(data)
+    } catch (error) {
+      console.error('Gagal mengambil machine:', error)
+    }
+  }
+
+    useEffect(() => {
+    fetchCustomers()
+    fetchMachines()
+  }, [])
+
+  useEffect(() => {
+    fetchProductionLogs()
+  }, [page, pageSize])
+
+
+
+  const handlePageSizeChange = (size) => {
+    setPage(0)
+    setPageSize(Number(size))
+  }
+
+
+
+
+
     const handleApplyFilter = () => {
     setPage(0)
     fetchProductionLogs(filters)
@@ -136,8 +161,8 @@ function ProductionRawLogs() {
       customerId: '',
       machineId: '',
       shift: '',
-      tanggalMulai: '',
-      tanggalSelesai: '',
+      tanggalMulai: getStartDateOfMonth(),
+      tanggalSelesai: getTodayDate(),
     }
 
     setPage(0)

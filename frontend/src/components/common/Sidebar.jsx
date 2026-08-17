@@ -6,7 +6,8 @@ import {
   LayoutDashboard,
   ClipboardList,
   FileInput,
-  ChartColumnDecreasing
+  ChartColumnDecreasing,
+  ChartArea
 } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import logoHTP from '../../gambar/logo/logo_HTP.png'
@@ -121,7 +122,7 @@ function Sidebar() {
             }
           >
 
-            <FileInput size={20} />
+            <LayoutDashboard size={20} />
 
             <span>
               Dashoboard
@@ -145,7 +146,7 @@ function Sidebar() {
             }
           >
 
-            <FileInput size={20} />
+            <ChartArea size={20} />
 
             <span>
               Summary Operator

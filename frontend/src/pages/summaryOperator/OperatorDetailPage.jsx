@@ -10,18 +10,16 @@ const OperatorDetailPage = () => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const getTodayISO = () => new Date().toISOString().split('T')[0]
-  const getFirstDayOfMonthISO = () => {
-    const d = new Date()
-    return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]
-  }
+  
+    const getTodayISO = () => new Date().toISOString().split('T')[0]
+    const getFirstDayOfMonthISO = () => {
+      const d = new Date()
+      return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]
+    }
 
-  // Tangkap tanggal awal dari Page 1 jika ada
-  const initialMulai = location.state?.tanggalMulai || getFirstDayOfMonthISO()
-  const initialSelesai = location.state?.tanggalSelesai || getTodayISO()
-
-  const [tanggalMulai, setTanggalMulai] = useState(initialMulai)
-  const [tanggalSelesai, setTanggalSelesai] = useState(initialSelesai)
+    // Ambil tanggal langsung dari state navigasi Page 1
+    const tanggalMulai = location.state?.tanggalMulai || getFirstDayOfMonthISO()
+    const tanggalSelesai = location.state?.tanggalSelesai || getTodayISO()
 
   const [halaman, setHalaman] = useState(0)
   const [jumlah, setJumlah] = useState(10)
@@ -121,38 +119,6 @@ const OperatorDetailPage = () => {
             </div>
             </header>
 
-        {/* Filter Tanggal Range */}
-        <section aria-label="Filters" className="rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-4">
-          <div className="flex items-center justify-end gap-2">
-            <label className="relative shrink-0">
-              <span className="sr-only">Tanggal mulai</span>
-              <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
-              <input
-                type="date"
-                value={tanggalMulai}
-                onChange={(e) => {
-                  setTanggalMulai(e.target.value)
-                  setHalaman(0)
-                }}
-                className="h-11 w-full rounded-xl border border-border bg-background pl-10 pr-3 text-sm text-foreground outline-none focus:border-info sm:w-auto"
-              />
-            </label>
-            <span className="text-xs text-muted">s/d</span>
-            <label className="relative shrink-0">
-              <span className="sr-only">Tanggal selesai</span>
-              <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
-              <input
-                type="date"
-                value={tanggalSelesai}
-                onChange={(e) => {
-                  setTanggalSelesai(e.target.value)
-                  setHalaman(0)
-                }}
-                className="h-11 w-full rounded-xl border border-border bg-background pl-10 pr-3 text-sm text-foreground outline-none focus:border-info sm:w-auto"
-              />
-            </label>
-          </div>
-        </section>
 
         {/* Section 7 Cards */}
         <DetailCards cardsData={cardsData} loading={loadingCards} />
