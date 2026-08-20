@@ -102,6 +102,12 @@ function AddProduction() {
           return
         }
 
+        const handleKeyDown = (e) => {
+          if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault()
+          }
+        }
+
         try {
           setSubmitting(true)
           for (const { data, name } of activeShifts) {
@@ -165,7 +171,7 @@ function AddProduction() {
         </div>
         <div className="mt-6 flex justify-end">
           <button
-            type="submit"
+            type="button"
             disabled={submitting}
             className="rounded-xl bg-accent px-6 py-3 font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
