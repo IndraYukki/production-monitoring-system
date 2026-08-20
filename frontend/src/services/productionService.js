@@ -8,8 +8,10 @@ export const getProductionLogs = async ({
   tanggalMulai = '',
   tanggalSelesai = '',
   halaman = 0,
-  jumlah = 0,
-}= {}) => {
+  jumlah = 10,
+  sortBy = 'createdAt',
+  sortDir = 'desc',
+} = {}) => {
   const response = await api.get('/production', {
     params: {
       keyword: keyword || undefined,
@@ -20,8 +22,16 @@ export const getProductionLogs = async ({
       tanggalSelesai: tanggalSelesai || undefined,
       halaman,
       jumlah,
+      sortBy,
+      sortDir,
     },
   })
+  return response.data
+}
+
+// Tambahkan fungsi ini di productionService.js
+export const createProduction = async (payload) => {
+  const response = await api.post('/production', payload)
   return response.data
 }
 
@@ -56,5 +66,12 @@ export const exportProductionExcel = async ({
 
 export const deleteProduction = async (id) => {
   const response = await api.delete(`/production/${id}`)
+  return response.data
+}
+
+
+// PUT update data produksi berdasarkan ID
+export const updateProduction = async (id, payload) => {
+  const response = await api.put(`/production/${id}`, payload)
   return response.data
 }

@@ -2,9 +2,10 @@ function ProductionDetailModal({
   open,
   onClose,
   production,
-  onDelete,
 }) {
   if (!open || !production) return null
+
+  const defects = production?.defects || []
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
@@ -137,7 +138,7 @@ function ProductionDetailModal({
               <div className="rounded-xl bg-card-secondary p-4">
                 <p className="text-xs text-muted">Operator 3</p>
                 <p className="mt-2 font-semibold text-muted">
-                  {production.Operator3Name ?? "-"}
+                  {production.operator3Name ?? "-"}
                 </p>
               </div>
 
@@ -160,7 +161,7 @@ function ProductionDetailModal({
               <div className="rounded-xl bg-card-secondary p-4">
                 <p className="text-xs text-muted">Uptime</p>
                 <p className="mt-2 text-lg font-semibold text-foreground">
-                  {production.uptimeMc}
+                  {production.uptimeDisplay || '-'}
                 </p>
               </div>
 
@@ -188,7 +189,7 @@ function ProductionDetailModal({
               <div className="rounded-xl bg-card-secondary p-4">
                 <p className="text-xs text-muted">Total Production</p>
                 <p className="mt-2 text-lg font-semibold text-foreground">
-                  {production.qtyOk + production.qtyWip + production.totalNg}
+                  {production.totalOutput?.toLocaleString('id-ID') ?? '0'}
                 </p>
               </div>
 
@@ -202,7 +203,7 @@ function ProductionDetailModal({
               <div className="rounded-xl bg-card-secondary p-4">
                 <p className="text-xs text-muted">Achievement</p>
                 <p className="mt-2 text-lg font-semibold text-warning">
-                  {production.achievement.toFixed(2)} %
+                  {Number(production.achievePercent ?? 0).toFixed(2)} %
                 </p>
               </div>
 
@@ -210,9 +211,11 @@ function ProductionDetailModal({
                 <p className="text-xs text-muted">Status</p>
 
                 <span className="mt-2 inline-flex rounded-full bg-danger/10 px-3 py-1 text-sm font-semibold text-danger">
-                  {production.status === 'TARGET' ? (
-                    <span className="text-accent">TARGET</span> ) : (
-                         <span className="text-danger">TIDAK TARGET</span> ) }
+                  {production.productionStatus === 'Tercapai' || (production.achievePercent || 0) >= 100 ? (
+                    <span className="text-success">TERCAPAI</span>
+                  ) : (
+                    <span className="text-danger">{production.productionStatus || 'TIDAK TARGET'}</span>
+                  )}
                 </span>
 
               </div>
@@ -267,16 +270,13 @@ function ProductionDetailModal({
           {/* Remark */}
           {/* =============================== */}
 
-          <section>
-
+          <section className="mb-8">
             <h3 className="mb-4 border-b border-border pb-2 text-lg font-semibold text-foreground">
-              {production.remark ?? "-"}
+              Remark
             </h3>
-
-            <div className="rounded-xl bg-card-secondary p-4 text-muted">
-              -
+            <div className="rounded-xl bg-card-secondary p-4 text-sm text-foreground">
+              {production.remark || '-'}
             </div>
-
           </section>
 
         </div>
@@ -284,14 +284,7 @@ function ProductionDetailModal({
         {/* Footer */}
         <div className="border-t border-border px-6 py-4">
 
-          <div className="flex justify-end">
-             <button
-                type="button"
-                onClick={() => onDelete(production)}
-                className="rounded-xl bg-danger px-6 py-3 font-semibold text-white transition hover:opacity-90"
-              >
-                Delete
-              </button>
+          <div className="flex justify-end gap-3">
 
             <button
               onClick={onClose}

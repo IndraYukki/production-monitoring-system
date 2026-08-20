@@ -15,7 +15,6 @@ public class ProductionResponseDTO {
     private Long productId;
     private String partNo;
     private String partName;
-    private String status;
     private Long machineId;
     private String machineName;
     private String shift;
@@ -28,7 +27,15 @@ public class ProductionResponseDTO {
     private Long operator3Id;
     private String operator3Name;
     private String groub3 = "";
-    private Integer uptimeMc;
+    private Integer totalNg;
+    private Integer totalOutput;
+    private Integer target;
+    private Integer achievePercent;
+    private String productionStatus;
+    private String uptimeDisplay;
+    private Integer inputJam;
+    private Integer inputMenit;
+
     private Integer qtyOk = 0;
     private Integer qtyWip = 0;
     private Integer cycleTime = 0;
@@ -41,10 +48,6 @@ public class ProductionResponseDTO {
     private Long customerId;
     private String customerName;
 
-
-    public Integer getUptimeMc() {
-        return uptimeMc != null ? uptimeMc : 0;
-    }
 
     public Integer getQtyOk() {
         return qtyOk != null ? qtyOk : 0;

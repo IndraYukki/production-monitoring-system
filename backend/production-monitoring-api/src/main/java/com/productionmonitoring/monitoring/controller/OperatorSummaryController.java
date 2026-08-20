@@ -38,10 +38,12 @@ public class OperatorSummaryController {
             @RequestParam(required = false) String groub,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int halaman,
-            @RequestParam(defaultValue = "10") int jumlah
+            @RequestParam(defaultValue = "10") int jumlah,
+            @RequestParam(defaultValue = "operatorName") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
     ) {
         return operatorSummaryService.getOperatorSummaryList(
-                tanggalMulai, tanggalSelesai, groub, keyword, halaman, jumlah
+                tanggalMulai, tanggalSelesai, groub, keyword, halaman, jumlah, sortBy, sortDir
         );
     }
 
@@ -51,10 +53,12 @@ public class OperatorSummaryController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalMulai,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalSelesai,
             @RequestParam(defaultValue = "0") int halaman,
-            @RequestParam(defaultValue = "10") int jumlah
+            @RequestParam(defaultValue = "10") int jumlah,
+            @RequestParam(defaultValue = "productionLot") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
     ) {
         return operatorSummaryService.getOperatorDetailLogs(
-                operatorId, tanggalMulai, tanggalSelesai, halaman, jumlah
+                operatorId, tanggalMulai, tanggalSelesai, halaman, jumlah, sortBy, sortDir
         );
     }
 

@@ -22,8 +22,11 @@ public class ProductionRequestDTO {
     private Long operator3Id;
 
     @NotNull(message = "Uptime mesin tidak boleh kosong")
-    @PositiveOrZero(message = "Uptime mesin tidak boleh negatif")
-    private Integer uptimeMc = 0;
+    @PositiveOrZero(message = "Jam tidak boleh negatif")
+    private Integer inputJam = 0;
+
+    @PositiveOrZero(message = "Menit tidak boleh negatif")
+    private Integer inputMenit = 0;
 
     @PositiveOrZero(message = "Qty OK tidak boleh negatif")
     private Integer qtyOk = 0;
@@ -38,11 +41,18 @@ public class ProductionRequestDTO {
     @Valid
     private List<QtyDefectRequestDTO> defects;
 
-
-    public Integer getUptimeMc() {
-        return uptimeMc != null ? uptimeMc : 0;
+    public Integer getInputJam() {
+        return inputJam != null ? inputJam : 0;
     }
 
+    public Integer getInputMenit() {
+        return inputMenit != null ? inputMenit : 0;
+    }
+
+    // BE yang konversi ke menit
+    public Integer getUptimeMc() {
+        return (getInputJam() * 60) + getInputMenit();
+    }
     public Integer getQtyOk() {
         return qtyOk != null ? qtyOk : 0;
     }

@@ -35,6 +35,31 @@ function ShiftForm({ shift, data, setData, isSelected}) {
 
 
 
+
+    // Validasi Jam (Maksimal 8 Jam)
+      const handleJamChange = (e) => {
+        let val = e.target.value
+        if (val !== '') {
+          let num = Number(val)
+          if (num > 8) num = 8   // Tahan di angka 8 jika melebihi
+          if (num < 0) num = 0
+          val = num
+        }
+        setData((prev) => ({ ...prev, inputJam: val }))
+      }
+
+      // Validasi Menit (Maksimal 59 Menit)
+      const handleMenitChange = (e) => {
+        let val = e.target.value
+        if (val !== '') {
+          let num = Number(val)
+          if (num > 59) num = 59 // Tahan di angka 59 jika melebihi
+          if (num < 0) num = 0
+          val = num
+        }
+        setData((prev) => ({ ...prev, inputMenit: val }))
+      }
+
     const handleDefectChange = (defectId, value) => {
       const qty = Number(value)
 
@@ -160,60 +185,49 @@ function ShiftForm({ shift, data, setData, isSelected}) {
       {/* Production Result */}
 
       <div>
-                {/* Uptime MC */}
-            <div>
-            <label className="mb-2 block text-sm font-medium text-foreground">
-                Uptime MC
-                <span className="ml-1 text-danger">*</span>
-            </label>
+           {/* Uptime MC */}
+              <div>
+                <label className="mb-2 block text-sm font-medium text-foreground">
+                  Uptime MC
+                  <span className="ml-1 text-danger">*</span>
+                </label>
 
-            <div className="grid grid-cols-2 gap-3">
-                {/* Hour */}
-                <div>
-                <input
-                    type="number"
-                    min="0"
-                    value={data.uptimeHours}
-                    onChange={(e) =>
-                      setData((prev) => ({
-                        ...prev,
-                        uptimeHours: e.target.value,
-                      }))
-                    }
-                    onWheel={(e) => e.currentTarget.blur()}
-                    placeholder="Hour"
-                    className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
-                />
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Hour */}
+                  <div>
+                    <input
+                      type="number"
+                      min="0"
+                      max="8"
+                      value={data.inputJam ?? ''}
+                      onChange={handleJamChange}
+                      onWheel={(e) => e.currentTarget.blur()}
+                      placeholder="Hour (0-8)"
+                      className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
+                    />
+                    <p className="mt-1 text-xs text-muted">
+                      Jam (Maks 8)
+                    </p>
+                  </div>
 
-                <p className="mt-1 text-xs text-muted">
-                    Jam
-                </p>
+                  {/* Minute */}
+                  <div>
+                    <input
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={data.inputMenit ?? ''}
+                      onChange={handleMenitChange}
+                      onWheel={(e) => e.currentTarget.blur()}
+                      placeholder="Minute (0-59)"
+                      className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
+                    />
+                    <p className="mt-1 text-xs text-muted">
+                      Menit (Maks 59)
+                    </p>
+                  </div>
                 </div>
-
-                {/* Minute */}
-                <div>
-                <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={data.uptimeMinutes}
-                    onChange={(e) =>
-                      setData((prev) => ({
-                        ...prev,
-                        uptimeMinutes: e.target.value,
-                      }))
-                    }
-                    onWheel={(e) => e.currentTarget.blur()}
-                    placeholder="Minute"
-                    className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
-                />
-
-                <p className="mt-1 text-xs text-muted">
-                    Menit
-                </p>
-                </div>
-            </div>
-            </div>
+              </div>
       </div>
       <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
 
@@ -303,6 +317,28 @@ function ShiftForm({ shift, data, setData, isSelected}) {
                 })}
             </div>
 
+            </div>
+
+
+            <div>
+              {/* Remark / Catatan */}
+                <div className="mt-5">
+                  <label className="mb-2 block text-sm font-medium text-foreground">
+                    Remark / Catatan Shift
+                  </label>
+                  <textarea
+                    rows="2"
+                    value={data.remark ?? ''}
+                    onChange={(e) =>
+                      setData((prev) => ({
+                        ...prev,
+                        remark: e.target.value,
+                      }))
+                    }
+                    placeholder="Contoh: Mold problem 30 min, ganti material, dll..."
+                    className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info resize-none"
+                  />
+                </div>
             </div>
         </div>
 

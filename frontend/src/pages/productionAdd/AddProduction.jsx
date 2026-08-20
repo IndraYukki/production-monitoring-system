@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import api from '../../services/api'
 import ProductionHeader from '../../components/production/ProductionHeader'
+import { createProduction } from '../../services/productionService'
 
 import ProductionInfo from '../../components/production/ProductionInfo'
 import ShiftForm from '../../components/production/ShiftForm'
@@ -13,8 +13,9 @@ const initialShift = {
   qtyOk: '',
   qtyWip: '',
 
-  uptimeHours: '',
-  uptimeMinutes: '',
+  inputJam: '',   
+  inputMenit: '', 
+  remark: '',     
 
   defects: [],
 }
@@ -42,35 +43,33 @@ function AddProduction() {
   const [shift2, setShift2] = useState(initialShift);
   const [shift3, setShift3] = useState(initialShift);
 
-  const convertUptime = (shift) => {
-    const hours = Number(shift.uptimeHours) || 0
-    const minutes = Number(shift.uptimeMinutes) || 0
 
-    return (hours * 60) + minutes
-  };
 
-    const buildPayload = (shift, shiftName) => {
 
-      return {
-        productId: productionInfo.productId,
-        machineId: productionInfo.machineId,
+      //buildPayload sesuai ProductionRequestDTO
+      const buildPayload = (shift, shiftName) => {
+        return {
+          productId: productionInfo.productId,
+          machineId: productionInfo.machineId,
 
-        shift: shiftName,
+          shift: shiftName,
 
-        operator1Id: shift.operator1Id,
-        operator2Id: shift.operator2Id,
-        operator3Id: shift.operator3Id,
+          operator1Id: shift.operator1Id,
+          operator2Id: shift.operator2Id,
+          operator3Id: shift.operator3Id,
 
-        uptimeMc: convertUptime(shift),
+          inputJam: shift.inputJam ? Number(shift.inputJam) : 0,
+          inputMenit: shift.inputMenit ? Number(shift.inputMenit) : 0,
 
-        qtyOk: shift.qtyOk ? Number(shift.qtyOk) : null,
-        qtyWip: shift.qtyWip ? Number(shift.qtyWip) : null,
+          qtyOk: shift.qtyOk ? Number(shift.qtyOk) : 0,
+          qtyWip: shift.qtyWip ? Number(shift.qtyWip) : 0,
 
-        productionLot: productionInfo.productionLot,
+          productionLot: productionInfo.productionLot,
+          remark: shift.remark || '',
 
-        defects: shift.defects,
-      }    
-    }
+          defects: shift.defects || [],
+        }
+      }
 
 
       const handleSubmit = async (e) => {
@@ -108,34 +107,28 @@ function AddProduction() {
           for (const { data, name } of activeShifts) {
             const payload = buildPayload(data, name)
 
-            await api.post('/production', payload)
+            // ✅ Menggunakan service layer
+            await createProduction(payload)
           }
 
           alert('Laporan production berhasil disimpan')
           resetForm()
-
         } catch (error) {
           console.error('Gagal submit production:', error)
-          const errorMessage = error.response?.data?.message || error.message || `Gagal menyimpan data`
+          const errorMessage =
+            error.response?.data?.message ||
+            error.message ||
+            `Gagal menyimpan data`
           alert(errorMessage)
-        } 
-        finally {
+        } finally {
           setSubmitting(false)
         }
 
       }
 
-
-
-
-  
-
-
-
-
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto w-full max-w-362.5 px-4 py-6 sm:px-6 md:py-8 lg:px-8">
+      <div className="mx-auto w-full sm:px-6 md:py-8 lg:px-8">
 
 
       <form onSubmit={handleSubmit}>

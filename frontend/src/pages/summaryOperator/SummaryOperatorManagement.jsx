@@ -46,6 +46,24 @@ export default function SummaryOperatorManagement() {
   const [loadingCards, setLoadingCards] = useState(false)
   const [loadingTable, setLoadingTable] = useState(false)
 
+
+  // State Sort
+    const [sortConfig, setSortConfig] = useState({
+      sortBy: 'operatorName',
+      sortDir: 'asc',
+    })
+
+    // Handler Klik Header Tabel
+    const handleSort = (columnName) => {
+      let newDir = 'asc'
+      if (sortConfig.sortBy === columnName && sortConfig.sortDir === 'asc') {
+        newDir = 'desc'
+      }
+
+      setSortConfig({ sortBy: columnName, sortDir: newDir })
+      setHalaman(0) // Reset ke halaman pertama saat sort berubah
+    }
+
   // Trigger API Cards (Reload saat tanggal atau groub berubah)
   const fetchCards = useCallback(async () => {
     try {
@@ -60,28 +78,38 @@ export default function SummaryOperatorManagement() {
   }, [tanggalMulai, tanggalSelesai, groub])
 
   // Trigger API Table (Reload saat tanggal, groub, keyword, halaman, atau jumlah berubah)
-  const fetchTable = useCallback(async () => {
-    try {
-      setLoadingTable(true)
-      const data = await getOperatorSummaryList({
-        tanggalMulai,
-        tanggalSelesai,
-        groub,
-        keyword,
-        halaman,
-        jumlah,
-      })
-      setPageData({
-        content: data?.content || [],
-        totalPages: data?.totalPages || 0,
-        totalElements: data?.totalElements || 0,
-      })
-    } catch (error) {
-      console.error('Error fetching operator summary list:', error)
-    } finally {
-      setLoadingTable(false)
-    }
-  }, [tanggalMulai, tanggalSelesai, groub, keyword, halaman, jumlah])
+    const fetchTable = useCallback(async () => {
+      try {
+        setLoadingTable(true)
+        const data = await getOperatorSummaryList({
+          tanggalMulai,
+          tanggalSelesai,
+          groub,
+          keyword,
+          halaman,
+          jumlah,
+          sortBy: sortConfig.sortBy, // ✅ Sertakan parameter sortBy
+          sortDir: sortConfig.sortDir, // ✅ Sertakan parameter sortDir
+        })
+        setPageData({
+          content: data?.content || [],
+          totalPages: data?.totalPages || 0,
+          totalElements: data?.totalElements || 0,
+        })
+      } catch (error) {
+        console.error('Error fetching operator summary list:', error)
+      } finally {
+        setLoadingTable(false)
+      }
+    }, [
+      tanggalMulai,
+      tanggalSelesai,
+      groub,
+      keyword,
+      halaman,
+      jumlah,
+      sortConfig,
+    ]) 
 
   useEffect(() => {
     fetchCards()
@@ -183,17 +211,20 @@ export default function SummaryOperatorManagement() {
         <SummaryCards cardsData={cardsData} loading={loadingCards} />
 
         {/* Table Component */}
-        <SummaryTable
-          pageData={pageData}
-          loading={loadingTable}
-          keyword={keyword}
-          setKeyword={setKeyword}
-          halaman={halaman}
-          setHalaman={setHalaman}
-          jumlah={jumlah}
-          setJumlah={setJumlah}
-          onRowClick={handleRowClick}
-        />
+
+          <SummaryTable
+            pageData={pageData}
+            loading={loadingTable}
+            keyword={keyword}
+            setKeyword={setKeyword}
+            halaman={halaman}
+            setHalaman={setHalaman}
+            jumlah={jumlah}
+            setJumlah={setJumlah}
+            onRowClick={handleRowClick}
+            sortConfig={sortConfig} // ✅ Kirim state sortConfig
+            onSort={handleSort} // ✅ Kirim handler handleSort
+          />
 
       </div>
     </main>

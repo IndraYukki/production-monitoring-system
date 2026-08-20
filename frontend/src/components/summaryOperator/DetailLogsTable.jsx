@@ -8,6 +8,7 @@ export default function DetailLogsTable({
   setHalaman,
   jumlah,
   setJumlah,
+  onRowClick,
 }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
@@ -71,7 +72,11 @@ export default function DetailLogsTable({
                 const isTercapai = log.status === 'Tercapai' || (log.achievePercent ?? 0) >= 100
 
                 return (
-                  <tr key={log.productionId} className="hover:bg-card-secondary/40 transition">
+                  <tr 
+                    key={log.productionId} 
+                    onClick={() => onRowClick && onRowClick(log)} // ✅ PASANG KLIK DI SINI
+                    className="hover:bg-card-secondary/40 transition cursor-pointer" // ✅ TAMBAHKAN cursor-pointer
+                  >
                     <td className="px-5 py-4 text-xs text-muted">
                       {log.productionLot || '-'}
                     </td>

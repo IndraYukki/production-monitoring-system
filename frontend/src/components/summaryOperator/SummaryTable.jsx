@@ -11,7 +11,17 @@ const SummaryTable = ({
   jumlah,
   setJumlah,
   onRowClick,
+  sortConfig, 
+  onSort,
 }) => {
+    const renderSortIcon = (columnName) => {
+    if (sortConfig?.sortBy !== columnName) return null
+    return (
+      <span className="ml-1 text-[10px] text-info">
+        {sortConfig.sortDir === 'asc' ? '▲' : '▼'}
+      </span>
+    )
+  }
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
       {/* Table Header Controls */}
@@ -54,6 +64,7 @@ const SummaryTable = ({
                 <option value={10}>10</option>
                 <option value={25}>25</option>
                 <option value={50}>50</option>
+                <option value={100}>100</option>
               </select>
               <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted" />
             </div>
@@ -66,14 +77,63 @@ const SummaryTable = ({
         <table className="w-full min-w-180 text-left text-sm">
           <thead className="sticky top-0 z-20 bg-card-secondary text-xs uppercase tracking-[0.08em] text-muted">
             <tr>
-              <th className="px-5 py-3 font-medium">Operator</th>
+              <th
+                onClick={() => onSort('operatorName')}
+                className="px-5 py-3 font-medium cursor-pointer select-none hover:text-info transition"
+              >
+                Operator {renderSortIcon('operatorName')}
+              </th>
+
+              {/* Group */}
               <th className="px-5 py-3 font-medium">Group</th>
-              <th className="px-5 py-3 font-medium">Total OK</th>
-              <th className="px-5 py-3 font-medium">Total WIP</th>
-              <th className="px-5 py-3 font-medium">Total Output</th>
-              <th className="px-5 py-3 font-medium">Total Target</th>
-              <th className="px-5 py-3 font-medium">Achievement</th>
-              <th className="px-5 py-3 text-right font-medium">Detail Log</th>
+
+              {/* Total OK */}
+              <th
+                onClick={() => onSort('totalOk')}
+                className="px-5 py-3 font-medium cursor-pointer select-none hover:text-info transition"
+              >
+                Total OK {renderSortIcon('totalOk')}
+              </th>
+
+              {/* Total WIP */}
+              <th
+                onClick={() => onSort('totalWip')}
+                className="px-5 py-3 font-medium cursor-pointer select-none hover:text-info transition"
+              >
+                Total WIP {renderSortIcon('totalWip')}
+              </th>
+
+              {/* Total Output */}
+              <th
+                onClick={() => onSort('totalOutput')}
+                className="px-5 py-3 font-medium cursor-pointer select-none hover:text-info transition"
+              >
+                Total Output {renderSortIcon('totalOutput')}
+              </th>
+
+              {/* Total Target */}
+              <th
+                onClick={() => onSort('totalTarget')}
+                className="px-5 py-3 font-medium cursor-pointer select-none hover:text-info transition"
+              >
+                Total Target {renderSortIcon('totalTarget')}
+              </th>
+
+              {/* Achievement */}
+              <th
+                onClick={() => onSort('achievePercent')}
+                className="px-5 py-3 font-medium cursor-pointer select-none hover:text-info transition"
+              >
+                Achievement {renderSortIcon('achievePercent')}
+              </th>
+
+              {/* Total Logs */}
+              <th
+                onClick={() => onSort('totalLogs')}
+                className="px-5 py-3 text-right font-medium cursor-pointer select-none hover:text-info transition"
+              >
+                Detail Log {renderSortIcon('totalLogs')}
+              </th>
             </tr>
           </thead>
           {/* <tbody className="divide-y divide-border">

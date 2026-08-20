@@ -29,12 +29,16 @@ export const getOperatorSummaryList = async ({
   keyword = '',
   halaman = 0,
   jumlah = 10,
+  sortBy = 'operatorName',
+  sortDir = 'asc',
 }) => {
   const params = {
     tanggalMulai,
     tanggalSelesai,
     halaman,
     jumlah,
+    sortBy,
+    sortDir,
   }
 
   if (groub && groub !== 'All Active') {
@@ -71,12 +75,26 @@ export const getOperatorDetailCards = async (
  */
 export const getOperatorDetailLogs = async (
   operatorId,
-  { tanggalMulai, tanggalSelesai, halaman = 0, jumlah = 10 }
+  { 
+    tanggalMulai, 
+    tanggalSelesai, 
+    halaman = 0, 
+    jumlah = 10,
+    sortBy = 'productionLot',
+    sortDir = 'desc',
+  }
 ) => {
   const response = await api.get(
     `/monitoring/operator-summary/${operatorId}`,
     {
-      params: { tanggalMulai, tanggalSelesai, halaman, jumlah },
+      params: { 
+        tanggalMulai, 
+        tanggalSelesai, 
+        halaman, 
+        jumlah,
+        sortBy,
+        sortDir,
+      },
     }
   )
   return response.data

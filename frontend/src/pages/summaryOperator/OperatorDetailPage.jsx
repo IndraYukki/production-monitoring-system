@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useLocation, useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, CalendarDays } from 'lucide-react'
-import { getOperatorDetailCards, getOperatorDetailLogs } from '../../services/summaryOperatorService'
+import {
+  getOperatorDetailCards,
+  getOperatorDetailLogs,
+} from '../../services/summaryOperatorService'
 import DetailCards from '../../components/summaryOperator/DetailCards'
 import DetailLogsTable from '../../components/summaryOperator/DetailLogsTable'
+import ProductionDetailModal from '../../components/production/ProductionDetailModal'
 
 const OperatorDetailPage = () => {
   const { operatorId } = useParams()
@@ -29,6 +33,19 @@ const OperatorDetailPage = () => {
 
   const [loadingCards, setLoadingCards] = useState(false)
   const [loadingTable, setLoadingTable] = useState(false)
+
+  const [openDetailModal, setOpenDetailModal] = useState(false)
+  const [selectedProduction, setSelectedProduction] = useState(null)
+
+// ...
+
+    const handleOpenDetail = (log) => {
+      setSelectedProduction({
+        ...log,
+        id: log.productionId, // Memastikan prop id terbaca oleh ProductionDetailModal
+      })
+      setOpenDetailModal(true)
+    }
 
   // API 3: Get Operator Detail Cards
   const fetchDetailCards = useCallback(async () => {
@@ -131,6 +148,15 @@ const OperatorDetailPage = () => {
           setHalaman={setHalaman}
           jumlah={jumlah}
           setJumlah={setJumlah}
+          onRowClick={handleOpenDetail}
+        />
+        <ProductionDetailModal
+          open={openDetailModal}
+          onClose={() => setOpenDetailModal(false)}
+          production={selectedProduction}
+          onEdit={() => {
+            setOpenDetailModal(false)
+          }}
         />
 
       </div>

@@ -14,6 +14,7 @@ import com.productionmonitoring.repository.NgDefectRepository;
 import com.productionmonitoring.repository.OperatorRepository;
 import com.productionmonitoring.repository.ProductRepository;
 import com.productionmonitoring.repository.ProductionRepository;
+import com.productionmonitoring.util.ProductionCalculator;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -59,12 +60,22 @@ public class ProductionService {
     public Page<ProductionResponseDTO> lihatReport(
             ProductionFilterDTO filter,
             int halamanKe,
-            int jumlahData
-
+            int jumlahData,
+            String sortBy,
+            String sortDir
     ) {
-        Pageable perHalaman = PageRequest.of(halamanKe, jumlahData, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Specification<Production> specification =
-                specificationBuilder.build(filter);
+        // Whitelist field yang boleh di-sort
+        List<String> allowedSortFields = List.of(
+                "productionLot", "createdAt", "shift", "uptimeMc", "qtyOk", "qtyWip"
+        );
+
+        String safeSortBy = allowedSortFields.contains(sortBy) ? sortBy : "createdAt";
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable perHalaman = PageRequest.of(halamanKe, jumlahData, Sort.by(direction, safeSortBy));
+        Specification<Production> specification = specificationBuilder.build(filter);
 
         return productionRepository
                 .findAll(specification, perHalaman)
@@ -181,7 +192,6 @@ public class ProductionService {
     private ProductionResponseDTO toResponseDTO(Production production) {
         ProductionResponseDTO dto = new ProductionResponseDTO();
         dto.setId(production.getId());
-        dto.setUptimeMc(production.getUptimeMc());
         dto.setQtyOk(production.getQtyOk());
         dto.setQtyWip(production.getQtyWip());
         dto.setProductionLot(production.getProductionLot());
@@ -197,7 +207,6 @@ public class ProductionService {
             dto.setCycleTime(production.getProduct().getCycleTime());
             dto.setCavity(production.getProduct().getCavity());
             dto.setTakeTime(production.getProduct().getTakeTime());
-            dto.setStatus(production.getProduct().getStatus());
             if (production.getProduct().getCustomer() != null) {
                 dto.setCustomerId(
                         production.getProduct().getCustomer().getId()
@@ -237,6 +246,21 @@ public class ProductionService {
                     .map(this::toQtyDefectResponseDTO)
                     .toList());
         }
+
+        // Kalkulasi production KPI
+        int totalNg    = ProductionCalculator.hitungTotalNg(production);
+        int totalOutput = ProductionCalculator.hitungOutput(production);
+        int target     = ProductionCalculator.hitungTarget(production);
+        int achieve    = ProductionCalculator.hitungAchieve(totalOutput, target);
+
+        dto.setTotalNg(totalNg);
+        dto.setTotalOutput(totalOutput);
+        dto.setTarget(target);
+        dto.setAchievePercent(achieve);
+        dto.setProductionStatus(ProductionCalculator.hitungStatus(totalOutput, target));
+        dto.setUptimeDisplay(ProductionCalculator.formatUptime(production.getUptimeMc()));
+        dto.setInputJam(production.getUptimeMc() != null ? production.getUptimeMc() / 60 : 0);
+        dto.setInputMenit(production.getUptimeMc() != null ? production.getUptimeMc() % 60 : 0);
 
         return dto;
     }

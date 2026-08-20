@@ -1,5 +1,6 @@
 package com.productionmonitoring.monitoring;
 
+import com.productionmonitoring.dto.QtyDefectResponseDTO;
 import com.productionmonitoring.monitoring.dto.OperatorDetailCardDTO;
 import com.productionmonitoring.monitoring.dto.OperatorSummaryCardDTO;
 import com.productionmonitoring.monitoring.dto.OperatorSummaryRowDTO;
@@ -8,10 +9,12 @@ import com.productionmonitoring.entity.Operator;
 import com.productionmonitoring.entity.Production;
 import com.productionmonitoring.repository.OperatorRepository;
 import com.productionmonitoring.repository.ProductionRepository;
+import com.productionmonitoring.util.ProductionCalculator;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -45,8 +48,8 @@ public class OperatorSummaryService {
             if (p.getProduct() == null || p.getMachine() == null) continue;
             if (!operatorMatchGroub(p, groub)) continue;
 
-            totalOutput += hitungOutput(p);
-            totalTarget += hitungTarget(p);
+            totalOutput += ProductionCalculator.hitungOutput(p);
+            totalTarget += ProductionCalculator.hitungTarget(p);
         }
 
         int achievePercent = totalTarget > 0
@@ -67,7 +70,9 @@ public class OperatorSummaryService {
             String groub,
             String keyword,
             int halaman,
-            int jumlah
+            int jumlah,
+            String sortBy,
+            String sortDir
     ) {
         // Ambil operator sesuai filter groub & keyword
         List<Operator> operators = operatorRepository
@@ -88,8 +93,8 @@ public class OperatorSummaryService {
                 if (p.getProduct() == null || p.getMachine() == null) continue;
                 totalOk     += p.getQtyOk() != null ? p.getQtyOk() : 0;
                 totalWip    += p.getQtyWip() != null ? p.getQtyWip() : 0;
-                totalOutput += hitungOutput(p);
-                totalTarget += hitungTarget(p);
+                totalOutput += ProductionCalculator.hitungOutput(p);
+                totalTarget += ProductionCalculator.hitungTarget(p);
                 totalLogs++;
             }
 
@@ -110,6 +115,21 @@ public class OperatorSummaryService {
             row.setTotalLogs(totalLogs);
             rows.add(row);
         }
+        Comparator<OperatorSummaryRowDTO> comparator = switch (sortBy) {
+            case "totalOutput"   -> Comparator.comparing(OperatorSummaryRowDTO::getTotalOutput);
+            case "totalTarget"   -> Comparator.comparing(OperatorSummaryRowDTO::getTotalTarget);
+            case "achievePercent"-> Comparator.comparing(OperatorSummaryRowDTO::getAchievePercent);
+            case "totalLogs"     -> Comparator.comparing(OperatorSummaryRowDTO::getTotalLogs);
+            case "totalOk"       -> Comparator.comparing(OperatorSummaryRowDTO::getTotalOk);
+            case "totalWip"      -> Comparator.comparing(OperatorSummaryRowDTO::getTotalWip);
+            default              -> Comparator.comparing(OperatorSummaryRowDTO::getOperatorName);
+        };
+
+        if ("desc".equalsIgnoreCase(sortDir)) {
+            comparator = comparator.reversed();
+        }
+
+        rows.sort(comparator);
 
         // Manual pagination
         int start = halaman * jumlah;
@@ -126,46 +146,23 @@ public class OperatorSummaryService {
             LocalDate tanggalMulai,
             LocalDate tanggalSelesai,
             int halaman,
-            int jumlah
+            int jumlah,
+            String sortBy,
+            String sortDir
     ) {
-        Pageable pageable = PageRequest.of(halaman, jumlah, Sort.by(Sort.Direction.DESC, "productionLot"));
+        List<String> allowedFields = List.of("productionLot", "uptimeMc", "qtyOk", "qtyWip");
+        String safeSortBy = allowedFields.contains(sortBy) ? sortBy : "productionLot";
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir)
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-        Page<Production> page = productionRepository
-                .findByOperatorAndLotRange(operatorId, tanggalMulai, tanggalSelesai, pageable);
+        Pageable pageable = PageRequest.of(halaman, jumlah, Sort.by(direction, safeSortBy));
 
-        return page.map(this::toDetailLogDTO);
+        return productionRepository
+                .findByOperatorAndLotRange(operatorId, tanggalMulai, tanggalSelesai, pageable)
+                .map(this::toDetailLogDTO);
     }
 
     // ─── HELPER ──────────────────────────────────────────────────
-    private int hitungOutput(Production p) {
-        int ok  = p.getQtyOk()  != null ? p.getQtyOk()  : 0;
-        int wip = p.getQtyWip() != null ? p.getQtyWip() : 0;
-        int ng  = hitungTotalNg(p);
-        return ok + wip + ng;
-    }
-
-    private int hitungTotalNg(Production p) {
-        if (p.getDefects() == null) return 0;
-        return p.getDefects().stream()
-                .mapToInt(d -> d.getQtyNg() != null ? d.getQtyNg() : 0)
-                .sum();
-    }
-
-    private int hitungTarget(Production p) {
-        if (p.getMachine() == null || p.getProduct() == null) return 0;
-
-        boolean isWip = p.getMachine().getName().equalsIgnoreCase("WIP");
-        int waktu  = isWip
-                ? (p.getProduct().getTakeTime()  != null ? p.getProduct().getTakeTime()  : 0)
-                : (p.getProduct().getCycleTime() != null ? p.getProduct().getCycleTime() : 0);
-
-        if (waktu == 0) return 0;
-
-        int cavity  = p.getProduct().getCavity()  != null ? p.getProduct().getCavity()  : 0;
-        int uptime  = p.getUptimeMc()             != null ? p.getUptimeMc()             : 0;
-
-        return (int) Math.ceil((double) 3600 / waktu * cavity * (uptime / 60.0));
-    }
 
     private boolean operatorMatchGroub(Production p, String groub) {
         // Cek apakah salah satu operator di production record match groub
@@ -186,7 +183,7 @@ public class OperatorSummaryService {
         dto.setShift(p.getShift());
         dto.setProductionLot(p.getProductionLot());
         dto.setUptimeMc(p.getUptimeMc());
-        dto.setUptimeDisplay(formatUptime(p.getUptimeMc()));
+        dto.setUptimeDisplay(ProductionCalculator.formatUptime(p.getUptimeMc()));
 
         if (p.getProduct() != null) {
             dto.setPartNo(p.getProduct().getPartNo());
@@ -195,12 +192,51 @@ public class OperatorSummaryService {
         if (p.getMachine() != null) {
             dto.setMachineName(p.getMachine().getName());
         }
+        // Customer
+        if (p.getProduct() != null && p.getProduct().getCustomer() != null) {
+            dto.setCustomerId(p.getProduct().getCustomer().getId());
+            dto.setCustomerName(p.getProduct().getCustomer().getCustomer());
+        }
+
+// Operator
+        if (p.getOperator1() != null) {
+            dto.setOperator1Id(p.getOperator1().getId());
+            dto.setOperator1Name(p.getOperator1().getName());
+            dto.setGroub1(p.getOperator1().getGroub());
+        }
+        if (p.getOperator2() != null) {
+            dto.setOperator2Id(p.getOperator2().getId());
+            dto.setOperator2Name(p.getOperator2().getName());
+            dto.setGroub2(p.getOperator2().getGroub());
+        }
+        if (p.getOperator3() != null) {
+            dto.setOperator3Id(p.getOperator3().getId());
+            dto.setOperator3Name(p.getOperator3().getName());
+            dto.setGroub3(p.getOperator3().getGroub());
+        }
+
+        // Remark & Defects
+        dto.setRemark(p.getRemark());
+        if (p.getDefects() != null) {
+            dto.setDefects(p.getDefects().stream()
+                    .map(d -> {
+                        QtyDefectResponseDTO defectDTO = new QtyDefectResponseDTO();
+                        defectDTO.setId(d.getId());
+                        defectDTO.setQtyNg(d.getQtyNg());
+                        if (d.getNgDefect() != null) {
+                            defectDTO.setNgDefectId(d.getNgDefect().getId());
+                            defectDTO.setNgDefectName(d.getNgDefect().getName());
+                        }
+                        return defectDTO;
+                    })
+                    .toList());
+        }
 
         int ok     = p.getQtyOk()  != null ? p.getQtyOk()  : 0;
         int wip    = p.getQtyWip() != null ? p.getQtyWip() : 0;
-        int ng     = hitungTotalNg(p);
+        int ng = ProductionCalculator.hitungTotalNg(p);
         int output = ok + wip + ng;
-        int target = hitungTarget(p);
+        int target = ProductionCalculator.hitungTarget(p);
         int achieve = target > 0
                 ? (int) Math.floor((double) output / target * 100)
                 : 0;
@@ -213,14 +249,6 @@ public class OperatorSummaryService {
         dto.setAchievePercent(achieve);
         dto.setStatus(output >= target ? "Tercapai" : "Tidak Target");
         return dto;
-    }
-    private String formatUptime(Integer menitTotal) {
-        if (menitTotal == null || menitTotal == 0) return "0 menit";
-        int jam = menitTotal / 60;
-        int menit = menitTotal % 60;
-        if (jam == 0) return menit + " menit";
-        if (menit == 0) return jam + " jam";
-        return jam + " jam " + menit + " menit";
     }
 
     public OperatorDetailCardDTO getOperatorDetailCards(
@@ -242,10 +270,9 @@ public class OperatorSummaryService {
 
             int ok  = p.getQtyOk()  != null ? p.getQtyOk()  : 0;
             int wip = p.getQtyWip() != null ? p.getQtyWip() : 0;
-            int ng  = hitungTotalNg(p);
+            int ng = ProductionCalculator.hitungTotalNg(p);
             int output = ok + wip + ng;
-            int target = hitungTarget(p);
-
+            int target = ProductionCalculator.hitungTarget(p);
             totalOk     += ok;
             totalWip    += wip;
             totalNg     += ng;
@@ -270,7 +297,7 @@ public class OperatorSummaryService {
         dto.setTotalLogs(totalLogs);
         dto.setTotalLogsAchieve(totalLogsAchieve);
         dto.setAchievePercent(achievePercent);
-        dto.setUptimeDisplay(formatUptime(totalUptime));
+        dto.setUptimeDisplay(ProductionCalculator.formatUptime(totalUptime));
         dto.setOperatorName(operator.getName());
         dto.setNik(operator.getNik());
         dto.setGroub(operator.getGroub());

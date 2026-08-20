@@ -34,38 +34,20 @@ public class ProductionController {
 
     @GetMapping
     public Page<ProductionResponseDTO> lihatLaporan(
-
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(defaultValue = "0") int halaman,
+            @RequestParam(defaultValue = "70") int jumlah,
+            @RequestParam(required = false) Long machineId,
+            @RequestParam(required = false) String shift,
             @RequestParam(required = false)
-            String keyword,
-
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalMulai,
             @RequestParam(required = false)
-            Long customerId,
-
-            @RequestParam(defaultValue = "0")
-            int halaman,
-
-            @RequestParam(defaultValue = "70")
-            int jumlah,
-
-            @RequestParam(required = false)
-            Long machineId,
-
-            @RequestParam(required = false)
-            String shift,
-
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate tanggalMulai,
-
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate tanggalSelesai
-
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalSelesai,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
     ) {
-
-        ProductionFilterDTO filter =
-                new ProductionFilterDTO();
-
+        ProductionFilterDTO filter = new ProductionFilterDTO();
         filter.setKeyword(keyword);
         filter.setCustomerId(customerId);
         filter.setMachineId(machineId);
@@ -73,11 +55,7 @@ public class ProductionController {
         filter.setTanggalMulai(tanggalMulai);
         filter.setTanggalSelesai(tanggalSelesai);
 
-        return productionService.lihatReport(
-                filter,
-                halaman,
-                jumlah
-        );
+        return productionService.lihatReport(filter, halaman, jumlah, sortBy, sortDir);
     }
 
     // gerbang untuk export tanpa list
