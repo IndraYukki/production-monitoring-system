@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import ProductionHeader from '../../components/production/ProductionHeader'
 import { createProduction } from '../../services/productionService'
 
 import ProductionInfo from '../../components/production/ProductionInfo'
@@ -24,6 +23,8 @@ const initialProductionInfo = {
   productionLot: '',
   productId: null,
   machineId: null,
+  selectedProduct: null, 
+  selectedMachine: null,
 }
 
 
@@ -153,31 +154,39 @@ function AddProduction() {
               shift="SHIFT 1"
               data={shift1}
               setData={setShift1}
+              product={productionInfo.selectedProduct}
+              machine={productionInfo.selectedMachine}
             />
 
             <ShiftForm
               shift="SHIFT 2"
               data={shift2}
               setData={setShift2}
+              product={productionInfo.selectedProduct}
+              machine={productionInfo.selectedMachine}
             />
 
             <ShiftForm
               shift="SHIFT 3"
               data={shift3}
               setData={setShift3}
+              product={productionInfo.selectedProduct}
+              machine={productionInfo.selectedMachine}
             />
           </div>
 
         </div>
-        <div className="mt-6 flex justify-end">
+                <div className="mt-6 flex justify-end">
           <button
             type="button"
+            onClick={handleSubmit} // <--- Tambahkan onClick manual di sini
             disabled={submitting}
             className="rounded-xl bg-accent px-6 py-3 font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? 'Menyimpan...' : 'Simpan Production'}
           </button>
         </div>
+
       </form>
       </div>
     </main>

@@ -1,7 +1,40 @@
 import { useState, useEffect } from 'react'
-import OperatorAutoComplete from './OperatorAutoComplete'
+
+
+const MACHINES = [
+  { id: 1, name: 'WIP' },
+  { id: 2, name: 'MC-1' },
+  { id: 3, name: 'MC-2' },
+  { id: 4, name: 'MC-3' },
+  { id: 5, name: 'MC-4' },
+  { id: 6, name: 'MC-5' },
+  { id: 7, name: 'MC-6' },
+  { id: 8, name: 'MC-7' },
+  { id: 9, name: 'MC-8' },
+  { id: 10, name: 'MC-9' },
+  { id: 11, name: 'MC-10' },
+  { id: 12, name: 'MC-11' },
+  { id: 13, name: 'MC-12' },
+  { id: 14, name: 'MC-13' },
+  { id: 15, name: 'MC-14' },
+  { id: 16, name: 'MC-15' },
+  { id: 17, name: 'MC-16' },
+  { id: 18, name: 'MC-17' },
+  { id: 19, name: 'MC-18' },
+  { id: 20, name: 'MC-19' },
+  { id: 21, name: 'MC-20' },
+  { id: 22, name: 'MC-21' },
+  { id: 23, name: 'MC-22' },
+  { id: 24, name: 'MC-23' },
+  { id: 25, name: 'MC-24' },
+  { id: 26, name: 'MC-25' },
+  { id: 27, name: 'MC-26' },
+]
+
+const SHIFTS = ['SHIFT 1', 'SHIFT 2', 'SHIFT 3']
 
 const ngDefectsList = [
+
   { id: 4, name: 'BURRY' },
   { id: 5, name: 'OVERCUT' },
   { id: 6, name: 'DIRTY' },
@@ -187,89 +220,96 @@ function ProductionEditModal({
 
         {/* Modal Form Body */}
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-hidden">
-          <div className="overflow-y-auto p-6 space-y-6">
-            {/* 1. Basic Info Readonly */}
-            <div className="grid grid-cols-1 gap-4 rounded-xl bg-card-secondary p-4 sm:grid-cols-3">
+                    <div className="overflow-y-auto p-6 space-y-6">
+            {/* 1. Basic Info - Product & Date (Readonly) */}
+            <div className="grid grid-cols-1 gap-4 rounded-xl bg-card-secondary p-4 sm:grid-cols-2">
               <div>
-                <p className="text-xs text-muted uppercase">Customer</p>
-                <p className="font-semibold text-foreground mt-0.5">{production.customerName}</p>
+                <p className="text-xs text-muted uppercase">Customer / Product</p>
+                <p className="font-semibold text-foreground mt-0.5">
+                  {production.customerName} - {production.partName}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-muted uppercase">Lot Date</p>
                 <p className="font-mono font-semibold text-foreground mt-0.5">{production.productionLot}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted uppercase">Shift / Machine</p>
-                <p className="font-semibold text-foreground mt-0.5">{production.shift} / {production.machineName}</p>
-              </div>
             </div>
 
-            {/* 2. Operators */}
+            
+            {/* 3. Operators (Read-only Labels) */}
             <div>
               <h3 className="mb-3 text-sm font-semibold uppercase text-muted tracking-wider">
                 Operator Assignment
               </h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 rounded-xl bg-card-secondary p-4 md:grid-cols-3">
                 {/* Operator 1 */}
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-foreground">
-                    Operator 1 <span className="text-danger">*</span>
-                  </label>
-                  <OperatorAutoComplete
-                    value={op1Name}
-                    isSelected={Boolean(formData.operator1Id)}
-                    onChange={(val) => {
-                      setOp1Name(val)
-                      setFormData((prev) => ({ ...prev, operator1Id: null }))
-                    }}
-                    onSelect={(op) => {
-                      setOp1Name(op.name)
-                      setFormData((prev) => ({ ...prev, operator1Id: op.id }))
-                    }}
-                  />
+                  <p className="text-xs text-muted uppercase">Operator 1</p>
+                  <p className="font-semibold text-foreground mt-0.5">
+                    {op1Name || '-'}
+                  </p>
                 </div>
 
                 {/* Operator 2 */}
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-foreground">
-                    Operator 2
-                  </label>
-                  <OperatorAutoComplete
-                    value={op2Name}
-                    isSelected={Boolean(formData.operator2Id)}
-                    onChange={(val) => {
-                      setOp2Name(val)
-                      setFormData((prev) => ({ ...prev, operator2Id: null }))
-                    }}
-                    onSelect={(op) => {
-                      setOp2Name(op.name)
-                      setFormData((prev) => ({ ...prev, operator2Id: op.id }))
-                    }}
-                  />
+                  <p className="text-xs text-muted uppercase">Operator 2</p>
+                  <p className="font-semibold text-foreground mt-0.5">
+                    {op2Name || '-'}
+                  </p>
                 </div>
 
                 {/* Operator 3 */}
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-foreground">
-                    Operator 3
-                  </label>
-                  <OperatorAutoComplete
-                    value={op3Name}
-                    isSelected={Boolean(formData.operator3Id)}
-                    onChange={(val) => {
-                      setOp3Name(val)
-                      setFormData((prev) => ({ ...prev, operator3Id: null }))
-                    }}
-                    onSelect={(op) => {
-                      setOp3Name(op.name)
-                      setFormData((prev) => ({ ...prev, operator3Id: op.id }))
-                    }}
-                  />
+                  <p className="text-xs text-muted uppercase">Operator 3</p>
+                  <p className="font-semibold text-foreground mt-0.5">
+                    {op3Name || '-'}
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* 3. Uptime & Production Quantities */}
+            {/* 2. Machine & Shift (Editable) */}
+            <div>
+              <h3 className="mb-3 text-sm font-semibold uppercase text-muted tracking-wider">
+                Machine & Shift Selection
+              </h3>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-foreground">
+                    Machine <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    value={formData.machineId || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, machineId: Number(e.target.value) }))}
+                    className="w-full rounded-xl border border-border bg-card-secondary px-3 py-2.5 text-sm text-foreground outline-none focus:border-info"
+                  >
+                    {MACHINES.map((m) => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-foreground">
+                    Shift <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    value={formData.shift || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, shift: e.target.value }))}
+                    className="w-full rounded-xl border border-border bg-card-secondary px-3 py-2.5 text-sm text-foreground outline-none focus:border-info"
+                  >
+                    {SHIFTS.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+                        
+
+
+            {/* 4. Uptime & Production Quantities */}
+
             <div>
               <h3 className="mb-3 text-sm font-semibold uppercase text-muted tracking-wider">
                 Production Quantities & Uptime

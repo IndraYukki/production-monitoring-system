@@ -85,11 +85,11 @@ function MachineAutocomplete({ value, onChange }) {
     onChange(null)
   }
 
-  const handleSelect = (machine) => {
-    setKeyword(machine.name)
-    onChange(machine.id)
-    setIsOpen(false)
-  }
+    const handleSelect = (machine) => {
+      setKeyword(machine.name)
+      onChange(machine.id) 
+      setIsOpen(false)
+    }
 
   return (
     <div ref={containerRef} className="relative">

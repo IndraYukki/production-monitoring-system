@@ -2,6 +2,37 @@ import { useState, useEffect } from 'react'
 import PartNoAutocomplete from './PartNoAutocomplete'
 import MachineAutocomplete from './MachineAutoComplite'
 
+
+const MACHINES = [
+  { id: 1, name: 'WIP' },
+  { id: 2, name: 'MC-1' },
+  { id: 3, name: 'MC-2' },
+  { id: 4, name: 'MC-3' },
+  { id: 5, name: 'MC-4' },
+  { id: 6, name: 'MC-5' },
+  { id: 7, name: 'MC-6' },
+  { id: 8, name: 'MC-7' },
+  { id: 9, name: 'MC-8' },
+  { id: 10, name: 'MC-9' },
+  { id: 11, name: 'MC-10' },
+  { id: 12, name: 'MC-11' },
+  { id: 13, name: 'MC-12' },
+  { id: 14, name: 'MC-13' },
+  { id: 15, name: 'MC-14' },
+  { id: 16, name: 'MC-15' },
+  { id: 17, name: 'MC-16' },
+  { id: 18, name: 'MC-17' },
+  { id: 19, name: 'MC-18' },
+  { id: 20, name: 'MC-19' },
+  { id: 21, name: 'MC-20' },
+  { id: 22, name: 'MC-21' },
+  { id: 23, name: 'MC-22' },
+  { id: 24, name: 'MC-23' },
+  { id: 25, name: 'MC-24' },
+  { id: 26, name: 'MC-25' },
+  { id: 27, name: 'MC-26' },
+]
+
 function ProductionInfo({ data, setData }) {
 
   const [partNo, setPartNo] = useState('')
@@ -13,15 +44,19 @@ function ProductionInfo({ data, setData }) {
       }
     }, [data.productId])
 
-  const handleProductSelect = (product) => {
+    const handleProductSelect = (product) => {
     setSelectedProduct(product)
     setPartNo(product.partNo)
 
     setData((prev) => ({
       ...prev,
       productId: product.id,
+      selectedProduct: product, // ✅ Sinkronkan dengan AddProduction state
     }))
   }
+
+  // Hapus duplikasi handleProductSelect yang ada di bawahnya
+
 
   return (
     <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
@@ -67,7 +102,8 @@ function ProductionInfo({ data, setData }) {
           onChange={(value) => {
             setPartNo(value)
             setSelectedProduct(null)
-            setData((prev) => ({ ...prev, productId: null }))
+            setData((prev) => ({ ...prev, productId: null, selectedProduct: null }))
+            
           }}
           onSelect={handleProductSelect}
         />
@@ -81,12 +117,16 @@ function ProductionInfo({ data, setData }) {
 
           <MachineAutocomplete
             value={data.machineId}
-            onChange={(id) =>
+            onChange={(id) => {
+              // Cari objek mesin berdasarkan ID
+              const selectedMac = MACHINES.find((m) => m.id === id) || null
+
               setData((prev) => ({
                 ...prev,
                 machineId: id,
+                selectedMachine: selectedMac, // ✅ Cari & simpan objek mesinnya di sini!
               }))
-            }
+            }}
           />
         </div>
 
