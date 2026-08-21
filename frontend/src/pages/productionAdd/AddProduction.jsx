@@ -29,7 +29,9 @@ const initialProductionInfo = {
 
 
 function AddProduction() {
+  const AUTO_FILL_REMARK = 'OPERATOR TIDAK MENJELASKAN PENYEBAB TIDAK TARGET'
   const [submitting, setSubmitting] = useState(false)
+
 
   const [productionInfo, setProductionInfo] = useState(initialProductionInfo);
 
@@ -103,12 +105,6 @@ function AddProduction() {
           return
         }
 
-        const handleKeyDown = (e) => {
-          if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-            e.preventDefault()
-          }
-        }
-
         try {
           setSubmitting(true)
           for (const { data, name } of activeShifts) {
@@ -149,31 +145,38 @@ function AddProduction() {
 
        
 
-          <div className='grid md:grid-cols-3 gap-2'>
+                    <div className='grid md:grid-cols-3 gap-2'>
             <ShiftForm
               shift="SHIFT 1"
               data={shift1}
+              jam="08:00 - 16:00"
               setData={setShift1}
               product={productionInfo.selectedProduct}
               machine={productionInfo.selectedMachine}
+              autoFillText={AUTO_FILL_REMARK}
             />
 
             <ShiftForm
               shift="SHIFT 2"
               data={shift2}
+              jam="16:00 - 24:00"
               setData={setShift2}
               product={productionInfo.selectedProduct}
               machine={productionInfo.selectedMachine}
+              autoFillText={AUTO_FILL_REMARK}
             />
 
             <ShiftForm
               shift="SHIFT 3"
               data={shift3}
+              jam="00:00 - 08:00"
               setData={setShift3}
               product={productionInfo.selectedProduct}
               machine={productionInfo.selectedMachine}
+              autoFillText={AUTO_FILL_REMARK}
             />
           </div>
+
 
         </div>
                 <div className="mt-6 flex justify-end">

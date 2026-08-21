@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import PartNoAutocomplete from './PartNoAutocomplete'
 import OperatorAutoComplete from './OperatorAutoComplete'
 
 const ngDefects = [
@@ -17,7 +16,7 @@ const ngDefects = [
   { id: 15, name: 'BURAM' },
   { id: 16, name: 'WELDLINE' },
   { id: 17, name: 'SILVER' },
-  { id: 18, name: 'LAIN-LAIN' },
+  { id: 18, name: 'LAINYA' },
 ]
 
 const calculateTarget = (product, machineId, inputJam, inputMenit) => {
@@ -42,8 +41,9 @@ const calculateTarget = (product, machineId, inputJam, inputMenit) => {
   }
 }
 
-function ShiftForm({ shift, data, setData, isSelected, product, machine }) {
+function ShiftForm({ shift, data, setData, product, machine, jam, autoFillText }) {
   const [op1Name, setOp1Name] = useState('')
+
   const [op2Name, setOp2Name] = useState('')
   const [op3Name, setOp3Name] = useState('')
 
@@ -136,7 +136,7 @@ function ShiftForm({ shift, data, setData, isSelected, product, machine }) {
   return (
     <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
       {/* Header Form & Live Target Indicator */}
-      <div className="mb-6 border-b border-border pb-4">
+      <div className="mb-6 border-b border-border pb-4 flex justify-between">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">{shift}</h2>
 
@@ -144,12 +144,12 @@ function ShiftForm({ shift, data, setData, isSelected, product, machine }) {
         </div>
 
         <p className="mt-1 text-sm text-muted">
-          Enter production data for {shift}.
+          Jam Kerja  {jam}
         </p>
       </div>
 
       {/* Operators */}
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         {/* Operator 1 */}
         <div>
           <label className="mb-2 block text-sm font-medium text-foreground">
@@ -212,45 +212,49 @@ function ShiftForm({ shift, data, setData, isSelected, product, machine }) {
       <div className="mt-5">
         {/* Uptime MC */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-foreground">
+          <label className="mb-1 block text-sm font-medium text-foreground">
             Uptime MC<span className="ml-1 text-danger">*</span>
           </label>
 
           <div className="grid grid-cols-2 gap-3">
             {/* Hour */}
-            <div>
-              <input
-                type="number"
-                min="0"
-                max="8"
-                value={data.inputJam ?? ''}
-                onChange={handleJamChange}
-                onWheel={(e) => e.currentTarget.blur()}
-                placeholder="Hour (0-8)"
-                className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
-              />
-              <p className="mt-1 text-xs text-muted">Jam (Maks 8)</p>
-            </div>
-
+            <div className='flex'>
+              <div>
+                <input
+                  type="number"
+                  min="0"
+                  max="8"
+                  value={data.inputJam ?? ''}
+                  onChange={handleJamChange}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  placeholder="0-8"
+                  className="max-w-32 rounded-sm border border-border bg-card-secondary px-2 py-1 text-center text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
+                />
+                <p className="mt-1 text-xs text-muted text-center">Jam </p>
+              </div>
+              <div className='mx-2'>
+                :
+              </div>
+              <div>
             {/* Minute */}
-            <div>
-              <input
-                type="number"
-                min="0"
-                max="59"
-                value={data.inputMenit ?? ''}
-                onChange={handleMenitChange}
-                onWheel={(e) => e.currentTarget.blur()}
-                placeholder="Minute (0-59)"
-                className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
-              />
-              <p className="mt-1 text-xs text-muted">Menit (Maks 59)</p>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={data.inputMenit ?? ''}
+                  onChange={handleMenitChange}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  placeholder="0-59"
+                  className="max-w-32 rounded-sm border border-border bg-card-secondary px-2 py-1 text-center text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
+                />
+                <p className="mt-1 text-xs text-muted text-center">Menit </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+      <div className="mt-2 grid grid-cols-1 gap-5 md:grid-cols-2">
         {/* Qty OK */}
         <div>
           <label className="mb-2 block text-sm font-medium text-foreground">
@@ -268,7 +272,7 @@ function ShiftForm({ shift, data, setData, isSelected, product, machine }) {
             }
             onWheel={(e) => e.currentTarget.blur()}
             placeholder="Quantity"
-            className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
+            className="w-full rounded-xl border border-border bg-card-secondary px-2 py-2 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
           />
         </div>
 
@@ -289,20 +293,39 @@ function ShiftForm({ shift, data, setData, isSelected, product, machine }) {
             }
             onWheel={(e) => e.currentTarget.blur()}
             placeholder="Quantity"
-            className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
+            className="w-full rounded-xl border border-border bg-card-secondary px-2 py-2 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
           />
         </div>
       </div>
 
       {/* NG Defect */}
-      <div className="mt-6 border-t border-border pt-6 w-full">
-        <div className="mb-4">
-          <h3 className="text-base font-semibold text-foreground">
-            NG Defect
-          </h3>
-          <p className="mt-1 text-sm text-muted">
-            Enter the quantity for each defect found during this shift.
-          </p>
+      <div className="mt-5 border-t border-border pt-6 w-full">
+        <div className="flex items-center justify-between">
+
+          <div className="mb-4">
+            <h3 className="text-base font-semibold text-foreground">
+              NG Defect
+            </h3>
+          </div>
+          <div>
+            {/* Badge Real-time Target */}
+              {target > 0 && (
+                <div className="flex items-center gap-2 font-mono text-xs">
+                  <span className="text-muted">
+                    Target: {target.toLocaleString('id-ID')}
+                  </span>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                      isTercapai
+                        ? 'bg-accent text-success'
+                        : 'bg-danger/15 text-danger'
+                    }`}
+                  >
+                    {isTercapai ? '✓ Tercapai' : '✕ Tidak Target'}
+                  </span>
+                </div>
+              )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -325,38 +348,31 @@ function ShiftForm({ shift, data, setData, isSelected, product, machine }) {
                   }
                   onWheel={(e) => e.currentTarget.blur()}
                   placeholder="0"
-                  className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
+                  className="w-full rounded-sm border border-border bg-card-secondary px-2 py-1 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info"
                 />
               </div>
             )
           })}
         </div>
       </div>
-      <div>
-        {/* Badge Real-time Target */}
-          {target > 0 && (
-            <div className="flex items-center gap-2 font-mono text-xs">
-              <span className="text-muted">
-                Target: {target.toLocaleString('id-ID')}
-              </span>
-              <span
-                className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                  isTercapai
-                    ? 'bg-success/15 text-success'
-                    : 'bg-danger/15 text-danger'
-                }`}
-              >
-                {isTercapai ? '✓ Tercapai' : '✕ Tidak Target'}
-              </span>
-            </div>
-          )}
-      </div>
+      
 
       {/* Remark / Catatan */}
       <div className="mt-5">
-        <label className="mb-2 block text-sm font-medium text-foreground">
-          Remark / Catatan Shift
-        </label>
+        <div className="mb-2 flex items-center justify-between">
+          <label className="block text-sm font-medium text-foreground">
+            Remark / Catatan Shift
+          </label>
+
+          {/* Button Auto Fill */}
+          <button
+            type="button"
+            onClick={() => setData((prev) => ({ ...prev, remark: autoFillText }))}
+            className="text-[10px] font-bold text-info transition hover:text-accent"
+          >
+            + Auto Fill No Target
+          </button>
+        </div>
         <textarea
           rows="2"
           value={data.remark ?? ''}
@@ -366,10 +382,12 @@ function ShiftForm({ shift, data, setData, isSelected, product, machine }) {
               remark: e.target.value,
             }))
           }
-          placeholder="Contoh: Mold problem 30 min, ganti material, dll..."
+          placeholder="Contoh: Product Nempel, Nozel mampet, Cavity tidak sesuai, Dll"
           className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-info resize-none"
         />
       </div>
+
+
     </section>
   )
 }

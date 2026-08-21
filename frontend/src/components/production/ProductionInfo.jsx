@@ -51,156 +51,166 @@ function ProductionInfo({ data, setData }) {
     setData((prev) => ({
       ...prev,
       productId: product.id,
-      selectedProduct: product, // ✅ Sinkronkan dengan AddProduction state
+      selectedProduct: product, 
     }))
   }
 
-  // Hapus duplikasi handleProductSelect yang ada di bawahnya
 
 
-  return (
-    <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
 
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold">
-          Production Information
-        </h2>
-
-        <p className="mt-1 text-sm text-muted">
-          Enter the basic information for this production report.
-        </p>
+    return (
+    <section className="rounded-2xl border border-border bg-card p-5 md:p-6 shadow-sm">
+      {/* Header */}
+      <div className="mb-6 flex items-center gap-3 border-b border-border pb-4">
+        <div className="h-8 w-1.5 rounded-full bg-info"></div>
+        <div>
+          <h2 className="text-lg font-bold text-foreground">
+            Production Information
+          </h2>
+          <p className="text-xs text-muted">
+            informasi detail produk terpilih
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        
+        {/* =========================================================
+            LEFT COLUMN: INPUT FORM
+            ========================================================= */}
+        <div className="space-y-5 lg:col-span-5">
+          {/* Production Lot */}
+          <div>
+            <label htmlFor="production-lot" className="mb-2 block text-sm font-semibold text-foreground">
+              Production Lot
+            </label>
+            <input
+              id="production-lot"
+              type="date"
+              value={data.productionLot}
+              onChange={(e) => setData((prev) => ({ ...prev, productionLot: e.target.value }))}
+              className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition focus:border-info focus:ring-2 focus:ring-info/20"
+            />
+          </div>
 
-        {/* Production Lot */}
-        <div>
-          <label
-            htmlFor="production-lot"
-            className="mb-2 block text-sm font-medium"
-          >
-            Production Lot
-          </label>
-
-          <input
-            id="production-lot"
-            type="date"
-            value={data.productionLot}
-            onChange={(e) =>
-              setData((prev) => ({
-                ...prev,
-                productionLot: e.target.value,
-              }))
-            }
-            className="w-full rounded-xl border border-border bg-card-secondary px-4 py-3 text-sm text-foreground outline-none transition focus:border-info"
-          />
-        </div>
-
-        {/* Part No */}
-        <PartNoAutocomplete
-          value={partNo}
-          onChange={(value) => {
-            setPartNo(value)
-            setSelectedProduct(null)
-            setData((prev) => ({ ...prev, productId: null, selectedProduct: null }))
-            
-          }}
-          onSelect={handleProductSelect}
-        />
-
-        {/* Machine */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-foreground">
-            Machine
-            <span className="ml-1 text-danger">*</span>
-          </label>
-
-          <MachineAutocomplete
-            value={data.machineId}
-            onChange={(id) => {
-              // Cari objek mesin berdasarkan ID
-              const selectedMac = MACHINES.find((m) => m.id === id) || null
-
-              setData((prev) => ({
-                ...prev,
-                machineId: id,
-                selectedMachine: selectedMac, // ✅ Cari & simpan objek mesinnya di sini!
-              }))
+          {/* Part No Selection */}
+          <PartNoAutocomplete
+            value={partNo}
+            onChange={(value) => {
+              setPartNo(value)
+              setSelectedProduct(null)
+              setData((prev) => ({ ...prev, productId: null, selectedProduct: null }))
             }}
+            onSelect={handleProductSelect}
           />
+
+          {/* Machine Selection */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-foreground">
+              Machine <span className="text-danger">*</span>
+            </label>
+            <MachineAutocomplete
+              value={data.machineId}
+              onChange={(id) => {
+                const selectedMac = MACHINES.find((m) => m.id === id) || null
+                setData((prev) => ({
+                  ...prev,
+                  machineId: id,
+                  selectedMachine: selectedMac,
+                }))
+              }}
+            />
+          </div>
         </div>
 
+        {/* =========================================================
+            RIGHT COLUMN: PRODUCT PREVIEW (ALWAYS VISIBLE)
+            ========================================================= */}
+        <div className="lg:col-span-7">
+          <div className={`h-full rounded-2xl border-2 border-dashed transition-all duration-300 ${
+            selectedProduct 
+              ? 'border-info/30 bg-card-secondary/50' 
+              : 'border-border/40 bg-transparent'
+          } p-2`}>
+            
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`h-2 w-2 rounded-full ${selectedProduct ? 'animate-pulse bg-success' : 'bg-inactive'}`}></div>
+                <span className={`text-xs font-bold uppercase tracking-wider ${selectedProduct ? 'text-success' : 'text-muted'}`}>
+                  {selectedProduct ? 'Product Active' : 'Waiting Selection'}
+                </span>
+              </div>
+              {selectedProduct && (
+                <span className="text-[10px] font-medium text-info bg-info/10 px-2 py-0.5 rounded-full uppercase">
+                  Confirmed
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-2 gap-y-2 sm:grid-cols-3">
+              {/* Part Name */}
+              <div className="col-span-2 sm:col-span-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Part Name</p>
+                <p className={`mt-1.5 text-lg font-bold leading-tight ${selectedProduct ? 'text-accent' : 'text-inactive'}`}>
+                  {selectedProduct?.partName || '---'}
+                </p>
+              </div>
+
+              {/* Customer */}
+              <div className="rounded-xl bg-card-secondary/40 p-3 border border-border/20">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Customer</p>
+                <p className={`mt-1 text-sm font-semibold ${selectedProduct ? 'text-foreground' : 'text-inactive'}`}>
+                  {selectedProduct?.customerName || '---'}
+                </p>
+              </div>
+
+              {/* Cavity */}
+              <div className="rounded-xl bg-card-secondary/40 p-3 border border-border/20">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Cavity</p>
+                <div className="mt-1 flex items-baseline gap-1">
+                  <p className={`text-base font-bold ${selectedProduct ? 'text-warning' : 'text-inactive'}`}>
+                    {selectedProduct?.cavity || '0'}
+                  </p>
+                  <span className="text-[10px] text-muted font-medium">CV</span>
+                </div>
+              </div>
+
+              {/* Standard Cycle Time */}
+              <div className="rounded-xl bg-card-secondary/40 p-3 border border-border/20">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Cycle Time</p>
+                <div className="mt-1 flex items-baseline gap-1">
+                  <p className={`text-base font-bold ${selectedProduct ? 'text-info' : 'text-inactive'}`}>
+                    {selectedProduct?.cycleTime || '0'}
+                  </p>
+                  <span className="text-[10px] text-muted font-medium italic">sec</span>
+                </div>
+              </div>
+
+              {/* Standard Take Time */}
+              <div className="rounded-xl bg-card-secondary/40 p-3 border border-border/20">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Take Time</p>
+                <div className="mt-1 flex items-baseline gap-1">
+                  <p className={`text-base font-bold ${selectedProduct ? 'text-info' : 'text-inactive'}`}>
+                    {selectedProduct?.takeTime || '0'}
+                  </p>
+                  <span className="text-[10px] text-muted font-medium italic">sec</span>
+                </div>
+              </div>
+            </div>
+
+            {!selectedProduct && (
+              <div className="mt-2 flex items-center justify-center border-t border-border/20 pt-2">
+                <p className="text-center text-[11px] italic text-muted/60 leading-relaxed">
+                  Silakan pilih Part Number terlebih dahulu untuk melihat detail informasi produk dan standar waktu produksi.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-
-      {/* Product Preview */}
-      {selectedProduct && (
-        <div className="mt-5 rounded-xl border border-border bg-card-secondary p-4">
-
-          <div className="mb-4 flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-success" />
-
-            <span className="text-sm font-medium text-success">
-              Product Selected
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
-            <div>
-              <p className="text-xs text-muted">
-                Part Name
-              </p>
-
-              <p className="mt-1 font-bold text-accent">
-                {selectedProduct.partName}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-muted">
-                Customer
-              </p>
-
-              <p className="mt-1 font-medium">
-                {selectedProduct.customerName}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-muted">
-                Cycle Time (MC)
-              </p>
-
-              <p className="mt-1 font-medium">
-                {selectedProduct.cycleTime} sec
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted">
-                Take Time (WIP)
-              </p>
-
-              <p className="mt-1 font-medium">
-                {selectedProduct.takeTime} sec
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-muted">
-                Cavity
-              </p>
-
-              <p className="mt-1 font-medium">
-                {selectedProduct.cavity}
-              </p>
-            </div>
-
-          </div>
-        </div>
-      )}
-
     </section>
   )
+
 }
 
 export default ProductionInfo

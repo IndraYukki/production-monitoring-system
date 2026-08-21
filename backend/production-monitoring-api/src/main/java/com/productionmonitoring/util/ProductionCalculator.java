@@ -56,4 +56,11 @@ public class ProductionCalculator {
         if (menit == 0) return jam + " jam";
         return jam + " jam " + menit + " menit";
     }
+
+    public static int hitungNgRate(Production p) {
+        int totalNg = hitungTotalNg(p);
+        int totalOutput = hitungOutput(p);
+        if (totalOutput == 0) return 0;
+        return (int) Math.floor((double) totalNg / totalOutput * 100);
+    }
 }
