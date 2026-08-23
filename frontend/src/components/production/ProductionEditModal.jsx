@@ -1,56 +1,8 @@
 import { useState, useEffect } from 'react'
-
-
-const MACHINES = [
-  { id: 1, name: 'WIP' },
-  { id: 2, name: 'MC-1' },
-  { id: 3, name: 'MC-2' },
-  { id: 4, name: 'MC-3' },
-  { id: 5, name: 'MC-4' },
-  { id: 6, name: 'MC-5' },
-  { id: 7, name: 'MC-6' },
-  { id: 8, name: 'MC-7' },
-  { id: 9, name: 'MC-8' },
-  { id: 10, name: 'MC-9' },
-  { id: 11, name: 'MC-10' },
-  { id: 12, name: 'MC-11' },
-  { id: 13, name: 'MC-12' },
-  { id: 14, name: 'MC-13' },
-  { id: 15, name: 'MC-14' },
-  { id: 16, name: 'MC-15' },
-  { id: 17, name: 'MC-16' },
-  { id: 18, name: 'MC-17' },
-  { id: 19, name: 'MC-18' },
-  { id: 20, name: 'MC-19' },
-  { id: 21, name: 'MC-20' },
-  { id: 22, name: 'MC-21' },
-  { id: 23, name: 'MC-22' },
-  { id: 24, name: 'MC-23' },
-  { id: 25, name: 'MC-24' },
-  { id: 26, name: 'MC-25' },
-  { id: 27, name: 'MC-26' },
-]
+import { MACHINES } from '../../constants/machines'
+import { NG_DEFECTS } from '../../constants/ngDefects'
 
 const SHIFTS = ['SHIFT 1', 'SHIFT 2', 'SHIFT 3']
-
-const ngDefectsList = [
-
-  { id: 4, name: 'BURRY' },
-  { id: 5, name: 'OVERCUT' },
-  { id: 6, name: 'DIRTY' },
-  { id: 7, name: 'DISCOLOR' },
-  { id: 8, name: 'BUBBLE' },
-  { id: 9, name: 'BROCKEN' },
-  { id: 10, name: 'BLACKDOT' },
-  { id: 11, name: 'SHORTMOLD' },
-  { id: 12, name: 'DENTED' },
-  { id: 13, name: 'SHINNING' },
-  { id: 14, name: 'BENDING' },
-  { id: 15, name: 'BURAM' },
-  { id: 16, name: 'WELDLINE' },
-  { id: 17, name: 'SILVER' },
-  { id: 18, name: 'LAIN-LAIN' },
-]
 
 function ProductionEditModal({
   open,
@@ -388,7 +340,7 @@ function ProductionEditModal({
                 NG Defect Breakdown
               </h3>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-                {ngDefectsList.map((defect) => {
+                {NG_DEFECTS.map((defect) => {
                   const activeDefect = formData.defects.find((d) => d.ngDefectId === defect.id)
 
                   return (

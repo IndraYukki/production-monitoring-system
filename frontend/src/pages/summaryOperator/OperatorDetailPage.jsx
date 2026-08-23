@@ -8,6 +8,7 @@ import {
 import DetailCards from '../../components/summaryOperator/DetailCards'
 import DetailLogsTable from '../../components/summaryOperator/DetailLogsTable'
 import ProductionDetailModal from '../../components/production/ProductionDetailModal'
+import { getTodayISO, getFirstDayOfMonthISO } from '../../utils/dateHelper'
 
 const OperatorDetailPage = () => {
   const { operatorId } = useParams()
@@ -15,12 +16,6 @@ const OperatorDetailPage = () => {
   const navigate = useNavigate()
 
   
-    const getTodayISO = () => new Date().toISOString().split('T')[0]
-    const getFirstDayOfMonthISO = () => {
-      const d = new Date()
-      return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]
-    }
-
     // Ambil tanggal langsung dari state navigasi Page 1
     const tanggalMulai = location.state?.tanggalMulai || getFirstDayOfMonthISO()
     const tanggalSelesai = location.state?.tanggalSelesai || getTodayISO()

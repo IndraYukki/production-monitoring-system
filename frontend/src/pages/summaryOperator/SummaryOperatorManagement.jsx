@@ -4,34 +4,16 @@ import { CalendarDays, SlidersHorizontal } from 'lucide-react'
 import { getSummaryCards, getOperatorSummaryList} from '../../services/summaryOperatorService'
 import SummaryCards from '../../components/summaryOperator/SummaryCards'
 import SummaryTable from '../../components/summaryOperator/SummaryTable'
-
-
+import { getTodayISO, getFirstDayOfMonthISO } from '../../utils/dateHelper'
 
 const GROUPS = ['All Active', 'A', 'B', 'C', 'RESIGN']
-
-  // Mengambil tanggal 1 di bulan dan tahun saat ini (Format: YYYY-MM-01)
-    const getStartDateOfMonth = () => {
-      const now = new Date()
-      const year = now.getFullYear()
-      const month = String(now.getMonth() + 1).padStart(2, '0')
-      return `${year}-${month}-01`
-    }
-
-    // Mengambil tanggal hari ini (Format: YYYY-MM-DD)
-    const getTodayDate = () => {
-      const now = new Date()
-      const year = now.getFullYear()
-      const month = String(now.getMonth() + 1).padStart(2, '0')
-      const day = String(now.getDate()).padStart(2, '0')
-      return `${year}-${month}-${day}`
-    }
 
 export default function SummaryOperatorManagement() {
   const navigate = useNavigate()
 
   
-  const [tanggalMulai, setTanggalMulai] = useState(getStartDateOfMonth())
-  const [tanggalSelesai, setTanggalSelesai] = useState(getTodayDate())
+  const [tanggalMulai, setTanggalMulai] = useState(getFirstDayOfMonthISO())
+  const [tanggalSelesai, setTanggalSelesai] = useState(getTodayISO())
 
   const [groub, setGroub] = useState('All Active')
   const [keyword, setKeyword] = useState('')

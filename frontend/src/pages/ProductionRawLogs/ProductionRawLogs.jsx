@@ -6,23 +6,7 @@ import { getCustomers } from '../../services/customerService'
 import { getMachines } from '../../services/machineService'
 import ProductionDetailModal from '../../components/production/ProductionDetailModal'
 import ProductionEditModal from '../../components/production/ProductionEditModal'
-
-// Mengambil tanggal 1 di bulan & tahun berjalan (YYYY-MM-01)
-const getStartDateOfMonth = () => {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  return `${year}-${month}-01`
-}
-
-// Mengambil tanggal hari ini (YYYY-MM-DD)
-const getTodayDate = () => {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+import { getTodayISO, getFirstDayOfMonthISO } from '../../utils/dateHelper'
 
 function ProductionRawLogs() {
   const [pageSize, setPageSize] = useState(10)
@@ -52,8 +36,8 @@ function ProductionRawLogs() {
     customerId: '',
     machineId: '',
     shift: '',
-    tanggalMulai: getStartDateOfMonth(),
-    tanggalSelesai: getTodayDate(),
+    tanggalMulai: getFirstDayOfMonthISO(),
+    tanggalSelesai: getTodayISO(),
   })
 
 
@@ -178,8 +162,8 @@ function ProductionRawLogs() {
       customerId: '',
       machineId: '',
       shift: '',
-      tanggalMulai: getStartDateOfMonth(),
-      tanggalSelesai: getTodayDate(),
+      tanggalMulai: getFirstDayOfMonthISO(),
+      tanggalSelesai: getTodayISO(),
     }
 
     setPage(0)

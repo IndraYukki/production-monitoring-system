@@ -1,45 +1,7 @@
 import { useState, useEffect } from 'react'
 import OperatorAutoComplete from './OperatorAutoComplete'
-
-const ngDefects = [
-  { id: 4, name: 'BURRY' },
-  { id: 5, name: 'OVERCUT' },
-  { id: 6, name: 'DIRTY' },
-  { id: 7, name: 'DISCOLOR' },
-  { id: 8, name: 'BUBBLE' },
-  { id: 9, name: 'BROCKEN' },
-  { id: 10, name: 'BLACKDOT' },
-  { id: 11, name: 'SHORTMOLD' },
-  { id: 12, name: 'DENTED' },
-  { id: 13, name: 'SHINNING' },
-  { id: 14, name: 'BENDING' },
-  { id: 15, name: 'BURAM' },
-  { id: 16, name: 'WELDLINE' },
-  { id: 17, name: 'SILVER' },
-  { id: 18, name: 'LAINYA' },
-]
-
-const calculateTarget = (product, machineId, inputJam, inputMenit) => {
-  if (!product || !machineId) return 0
-
-  const uptimeMinutes = (Number(inputJam) || 0) * 60 + (Number(inputMenit) || 0)
-  if (uptimeMinutes <= 0) return 0
-
-  // ID 1 adalah WIP (bisa angka 1 atau string "1")
-  const isWip = Number(machineId) === 1
-  const cavity = Number(product.cavity) || 0
-  const uptimeHours = uptimeMinutes / 60.0
-
-  if (isWip) {
-    const takeTime = Number(product.takeTime) || 0
-    if (takeTime === 0) return 0
-    return Math.ceil((3600 / takeTime) * uptimeHours)
-  } else {
-    const cycleTime = Number(product.cycleTime) || 0
-    if (cycleTime === 0) return 0
-    return Math.ceil((3600 / cycleTime) * cavity * uptimeHours)
-  }
-}
+import { calculateTarget, isWipMachine } from '../../utils/productionTarget'
+import { NG_DEFECTS } from '../../constants/ngDefects'
 
 function ShiftForm({ shift, data, setData, product, machine, jam, autoFillText }) {
   const [op1Name, setOp1Name] = useState('')
@@ -67,6 +29,19 @@ function ShiftForm({ shift, data, setData, product, machine, jam, autoFillText }
     data.inputMenit
   )
   const isTercapai = totalOutput >= target
+
+  // Machine WIP memakai Take Time, bukan Cycle Time.
+  // Kalau Take Time produk masih 0, target ikut 0 dan badge tidak muncul.
+  // Tanpa keterangan, operator tidak tahu kenapa badge-nya hilang.
+  const uptimeMenit =
+    (Number(data.inputJam) || 0) * 60 + (Number(data.inputMenit) || 0)
+
+  const takeTimeBelumDiisi =
+    Boolean(product) &&
+    Boolean(machine) &&
+    uptimeMenit > 0 &&
+    isWipMachine(machine) &&
+    !(Number(product.takeTime) > 0)
 
   // Validasi Jam (Maksimal 8 Jam)
   const handleJamChange = (e) => {
@@ -325,11 +300,21 @@ function ShiftForm({ shift, data, setData, product, machine, jam, autoFillText }
                   </span>
                 </div>
               )}
+
+              {/* Machine WIP tanpa Take Time — jelaskan kenapa target kosong */}
+              {takeTimeBelumDiisi && (
+                <span
+                  title="Target tidak bisa dihitung karena Take Time produk ini masih 0. Lengkapi lewat menu Product Management."
+                  className="inline-block rounded-full bg-warning/15 px-2.5 py-0.5 font-mono text-[10px] font-bold text-warning"
+                >
+                  ⚠ Product ini tidak memiliki Take Time
+                </span>
+              )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {ngDefects.map((defect) => {
+          {NG_DEFECTS.map((defect) => {
             const currentDefect = data.defects.find(
               (item) => item.ngDefectId === defect.id
             )
