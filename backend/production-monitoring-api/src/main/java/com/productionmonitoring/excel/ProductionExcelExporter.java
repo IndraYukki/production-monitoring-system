@@ -1,17 +1,35 @@
 package com.productionmonitoring.excel;
 
-import com.productionmonitoring.entity.Production;
 import com.productionmonitoring.util.ProductionCalculator;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import java.util.List;
+import java.util.Iterator;
+import java.util.stream.Stream;
 
 public class ProductionExcelExporter {
 
-    public Workbook export(List<Production> productions) {
+    /**
+     * Membangun workbook Excel dari baris proyeksi database (Object[]),
+     * BUKAN dari entity Production.
+     *
+     * Urutan kolom Object[] (dari ProductionRepository.findRowsForExport):
+     * [0]  customer_name,  [1] part_no,       [2] part_name,     [3] machine_name,
+     * [4]  shift,          [5] uptime_mc,     [6] operator1_name,
+     * [7]  operator2_name, [8] operator3_name, [9] qty_ok,       [10] qty_wip,
+     * [11] target,         [12] total_ng,     [13] total_output,
+     * [14] production_lot, [15] remark
+     *
+     * Achieve %, NG Rate %, dan Status dihitung di sini lewat
+     * ProductionCalculator (overload agregat) — TIDAK diduplikasi di SQL.
+     */
+    public Workbook export(Stream<Object[]> rows) {
 
-        Workbook workbook = new XSSFWorkbook();
+        // SXSSFWorkbook hanya menyimpan sebagian baris di memori,
+        // sisanya ditulis ke file sementara — aman untuk ratusan ribu baris.
+        SXSSFWorkbook workbook = new SXSSFWorkbook(100);
         Sheet sheet = workbook.createSheet("Raw Production");
 
         // ── Header row (row index 0) ──────────────────────────────────────────
@@ -44,65 +62,47 @@ public class ProductionExcelExporter {
 
         // ── Data rows (mulai dari row index 1) ───────────────────────────────
         int rowIndex = 1;
+        Iterator<Object[]> iterator = rows.iterator();
 
-        for (Production production : productions) {
+        while (iterator.hasNext()) {
+            Object[] r = iterator.next();
 
             // Semua kalkulasi via ProductionCalculator — tidak ada formula inline
-            int totalNg       = ProductionCalculator.hitungTotalNg(production);
-            int totalOutput   = ProductionCalculator.hitungOutput(production);
-            int target        = ProductionCalculator.hitungTarget(production);
-            int achievePct    = ProductionCalculator.hitungAchieve(totalOutput, target);
-            String status     = ProductionCalculator.hitungStatus(totalOutput, target);
-            String uptimeDisplay = ProductionCalculator.formatUptime(production.getUptimeMc());
+            long target      = ((Number) r[11]).longValue();
+            long totalNg     = ((Number) r[12]).longValue();
+            long totalOutput = ((Number) r[13]).longValue();
 
-            int ngRate = ProductionCalculator.hitungNgRate(production);
+            double achievePct = ProductionCalculator.hitungAchieve(totalOutput, target);
+            double ngRate     = ProductionCalculator.hitungNgRate(totalNg, totalOutput);
+            String status     = ProductionCalculator.hitungStatus((int) totalOutput, (int) target);
+            String uptimeDisplay = ProductionCalculator.formatUptime(((Number) r[5]).intValue());
 
             Row row = sheet.createRow(rowIndex++);
 
-            row.createCell(0).setCellValue(
-                    production.getProduct().getCustomer().getCustomer()
-            );
-            row.createCell(1).setCellValue(
-                    production.getProduct().getPartNo()
-            );
-            row.createCell(2).setCellValue(
-                    production.getProduct().getPartName()
-            );
-            row.createCell(3).setCellValue(
-                    production.getMachine().getName()
-            );
-            row.createCell(4).setCellValue(
-                    production.getShift()
-            );
+            row.createCell(0).setCellValue(r[0] == null ? "" : (String) r[0]);
+            row.createCell(1).setCellValue(r[1] == null ? "" : (String) r[1]);
+            row.createCell(2).setCellValue(r[2] == null ? "" : (String) r[2]);
+            row.createCell(3).setCellValue(r[3] == null ? "" : (String) r[3]);
+            row.createCell(4).setCellValue(r[4] == null ? "" : (String) r[4]);
             row.createCell(5).setCellValue(
                     uptimeDisplay   // "2 jam 20 menit" — konsisten dengan response DTO
             );
-            row.createCell(6).setCellValue(
-                    production.getOperator1().getName()
-            );
-            row.createCell(7).setCellValue(
-                    production.getOperator2() == null ? "" : production.getOperator2().getName()
-            );
-            row.createCell(8).setCellValue(
-                    production.getOperator3() == null ? "" : production.getOperator3().getName()
-            );
-            row.createCell(9).setCellValue(
-                    production.getQtyOk() != null ? production.getQtyOk() : 0
-            );
-            row.createCell(10).setCellValue(
-                    production.getQtyWip() != null ? production.getQtyWip() : 0
-            );
-            row.createCell(11).setCellValue(target);
-            row.createCell(12).setCellValue(totalNg);
-            row.createCell(13).setCellValue(totalOutput);
-            row.createCell(14).setCellValue(achievePct);   // sudah Math.floor, tanpa "%" — angka saja
-            row.createCell(15).setCellValue(ngRate);        // sudah Math.floor, tanpa "%" — angka saja
+            row.createCell(6).setCellValue(r[6] == null ? "" : (String) r[6]);
+            row.createCell(7).setCellValue(r[7] == null ? "" : (String) r[7]);
+            row.createCell(8).setCellValue(r[8] == null ? "" : (String) r[8]);
+            row.createCell(9).setCellValue(((Number) r[9]).doubleValue());
+            row.createCell(10).setCellValue(((Number) r[10]).doubleValue());
+            row.createCell(11).setCellValue((double) target);
+            row.createCell(12).setCellValue((double) totalNg);
+            row.createCell(13).setCellValue((double) totalOutput);
+            row.createCell(14).setCellValue(achievePct);   // sudah 2 desimal, tanpa "%" — angka saja
+            row.createCell(15).setCellValue(ngRate);        // sudah 2 desimal, tanpa "%" — angka saja
             row.createCell(16).setCellValue(status);        // "Tercapai" / "Tidak Target"
             row.createCell(17).setCellValue(
-                    production.getProductionLot().toString()
+                    r[14] == null ? "" : r[14].toString()
             );
             row.createCell(18).setCellValue(
-                    production.getRemark() == null ? "" : production.getRemark()
+                    r[15] == null ? "" : (String) r[15]
             );
         }
 

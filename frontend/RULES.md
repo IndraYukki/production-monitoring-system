@@ -122,3 +122,29 @@ Alasan:
 ...
 Dampak ke Komponen Lain:
 ...
+
+---
+
+# 0.6 Peta Utility & Konstanta Existing (WAJIB DICEK Sebelum Membuat Baru)
+
+File yang SUDAH tersedia dan dilarang diduplikasi:
+
+- src/constants/machines.js — MACHINES + findMachineById()
+  (master mesin; deteksi WIP berdasarkan NAMA 'wip', bukan id)
+- src/constants/ngDefects.js — NG_DEFECTS (id 18 = 'LAIN-LAIN' sesuai DB)
+- src/utils/productionTarget.js — isWipMachine() + calculateTarget()
+  (CERMIN ProductionCalculator.hitungTarget(); kalau formula backend
+   berubah, file ini WAJIB ikut diubah)
+- src/utils/dateHelper.js — getTodayISO() + getFirstDayOfMonthISO()
+  (memakai WAKTU LOKAL; jangan pakai toISOString().split('T')[0] —
+   di zona WIB tanggal mundur 1 hari)
+- src/utils/format.js — formatPercent() (semua tampilan persentase
+  memakai 2 desimal; backend mengirim Double, jangan dipotong lagi)
+
+Perbedaan nama field antar DTO backend (cek sebelum dipakai):
+
+- ProductionResponseDTO: totalNg + productionStatus
+- OperatorDetailLogDTO : qtyNg + status
+  Modal bersama ProductionDetailModal membaca nama milik
+  ProductionResponseDTO; mapping dari OperatorDetailLogDTO dilakukan di
+  OperatorDetailPage.handleOpenDetail.

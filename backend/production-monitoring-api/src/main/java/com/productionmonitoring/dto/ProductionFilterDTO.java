@@ -16,6 +16,7 @@ public class ProductionFilterDTO {
 
     private Long customerId;
     private Long machineId;
+    private Long operatorId;
 
     private String shift;
 }

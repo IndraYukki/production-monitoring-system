@@ -1,3 +1,5 @@
+import { formatPercent, formatDateTime } from '../../utils/format'
+
 function ProductionDetailModal({
   open,
   onClose,
@@ -101,7 +103,7 @@ function ProductionDetailModal({
               <div>
                 <p className="text-xs uppercase text-muted">Di Rekap</p>
                 <p className="mt-1 font-medium text-foreground">
-                  04 Aug 2026 13:21
+                  {formatDateTime(production.createdAt)}
                 </p>
               </div>
 
@@ -184,6 +186,9 @@ function ProductionDetailModal({
                 <p className="mt-2 text-lg font-semibold text-danger">
                   {production.totalNg}
                 </p>
+                <p className="mt-1 text-xs text-muted">
+                  Rate: {formatPercent(production.ngRate)}
+                </p>
               </div>
 
               <div className="rounded-xl bg-card-secondary p-4">
@@ -203,7 +208,7 @@ function ProductionDetailModal({
               <div className="rounded-xl bg-card-secondary p-4">
                 <p className="text-xs text-muted">Achievement</p>
                 <p className="mt-2 text-lg font-semibold text-warning">
-                  {Number(production.achievePercent ?? 0).toFixed(2)} %
+                  {formatPercent(production.achievePercent)}
                 </p>
               </div>
 

@@ -224,3 +224,25 @@ Frontend boleh melakukan:
 Tetapi business calculation utama harus berasal dari backend.
 
 ---
+
+# 0.9 Agregasi SQL adalah Cermin ProductionCalculator
+
+Agregasi summary monitoring dilakukan di database lewat native query pada:
+
+    ProductionRepository.sumProductionForCards(...)
+    ProductionRepository.sumProductionForOperator(...)
+
+Aturan:
+
+1. Rumus target di dalam SQL tersebut adalah CERMIN dari
+   ProductionCalculator.hitungTarget(). Kalau formula di ProductionCalculator
+   berubah, SQL di ProductionRepository WAJIB ikut diubah.
+2. JANGAN kembali ke pola "load semua entity lalu jumlah di loop Java" untuk
+   endpoint summary — itu yang diganti karena boros memori dan N+1.
+3. Field agregat DTO monitoring sudah Long (bukan Integer) — jangan
+   "mengembalikan" ke Integer tanpa alasan bisnis yang jelas.
+4. Semantik tetap: kartu summary menghitung produksi sekali (any operator
+   cocok grup); baris per-operator menghitung untuk setiap operator yang
+   terlibat.
+
+---

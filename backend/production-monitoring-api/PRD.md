@@ -424,7 +424,7 @@ Jika Take Time = 0:
 
 Function:
 
-    hitungAchieve(int output, int target)
+    hitungAchieve(long output, long target)
 
 Formula:
 
@@ -435,9 +435,8 @@ Jika Target = 0:
 
     Achievement = 0
 
-Hasil menggunakan pembulatan:
-
-    Math.floor()
+Hasil dibulatkan ke 2 desimal (double),
+contoh 98.57% (bukan 98%).
 
 ---
 
@@ -488,9 +487,8 @@ Jika Total Output = 0:
 
     NG Rate = 0
 
-Hasil menggunakan:
-
-    Math.floor()
+Hasil dibulatkan ke 2 desimal (double),
+contoh 0.83% (bukan 0%).
 
 ---
 
@@ -610,16 +608,16 @@ Current implementation:
             }
         }
 
-        public static int hitungAchieve(
-                int output,
-                int target
+        public static double hitungAchieve(
+                long output,
+                long target
         ) {
 
             if (target == 0) return 0;
 
-            return (int) Math.floor(
-                    (double) output / target * 100
-            );
+            return Math.round(
+                    (double) output / target * 10000.0
+            ) / 100.0;
         }
 
         public static String hitungStatus(
@@ -657,7 +655,7 @@ Current implementation:
                     + menit + " menit";
         }
 
-        public static int hitungNgRate(
+        public static double hitungNgRate(
                 Production p
         ) {
 
@@ -667,9 +665,9 @@ Current implementation:
             if (totalOutput == 0)
                 return 0;
 
-            return (int) Math.floor(
-                    (double) totalNg / totalOutput * 100
-            );
+            return Math.round(
+                    (double) totalNg / totalOutput * 10000.0
+            ) / 100.0;
         }
     }
 
@@ -1421,3 +1419,75 @@ Jika function belum tersedia:
     PERTIMBANGKAN MENAMBAHKANNYA KE ProductionCalculator.
 
 Jangan membuat function paralel yang memiliki tujuan sama.
+
+---
+
+# 47. MONITORING SUMMARY AGGREGATION (DATABASE)
+
+Update 23 Agu 2026 — menggantikan pola lama "load semua entity lalu jumlah di Java".
+
+## 47.1 Latar Belakang
+
+Endpoint summary semula memuat seluruh entity `Production` dalam rentang
+tanggal ke memori Java lalu menjumlahkannya di loop. Pada skala ratusan ribu
+log hal ini menyebabkan: (1) risiko `OutOfMemoryError`, (2) N+1 query defect
+per baris, (3) risiko overflow `Integer` pada akumulator.
+
+## 47.2 Arsitektur Sekarang
+
+Ketiga endpoint summary melakukan agregasi di PostgreSQL lewat native query:
+
+- `ProductionRepository.sumProductionForCards(...)`
+  -> kartu summary semua operator
+- `ProductionRepository.sumProductionForOperator(opId, ...)`
+  -> baris daftar operator & kartu detail per operator
+
+Java hanya menerima hasil akhir berupa angka (`List<Object[]>` satu baris).
+
+## 47.3 Tipe Data
+
+Field agregat pada DTO monitoring bertipe `Long`:
+
+- `OperatorSummaryCardDTO`: `totalOutput`, `totalTarget`
+- `OperatorSummaryRowDTO`: `totalOutput`, `totalTarget`, `totalOk`, `totalWip`
+- `OperatorDetailCardDTO`: `totalOutput`, `totalOk`, `totalWip`, `totalNg`,
+  `totalTarget`, `totalUptime`, `totalLogs`, `totalLogsAchieve`
+
+`achievePercent` / `totalAchieve` bertipe `Double` (2 desimal, misal 98.57).
+`ProductionResponseDTO` juga menyediakan `ngRate` (Double, 2 desimal).
+Kuantitas per-record tetap `Integer`.
+
+> ⚠️ Update (Agu 2026): `OperatorDetailLogDTO` & `ProductDetailLogDTO` sekarang
+> **ramping** (tanpa `ngRate`, defects, remark, customerName, createdAt, groub).
+> Data lengkap untuk modal `ProductionDetailModal` diambil FE saat baris diklik
+> lewat `GET /api/production/{id}` (`ProductionResponseDTO`). NG per baris di
+> list operator dihitung lewat `sumNgPerProductionIds` (satu query agregat),
+> bukan lazy-load defects per baris.
+
+## 47.4 RUMUS TARGET DI SQL ADALAH CERMIN PRODUCTION CALCULATOR
+
+Rumus target ditulis ulang di SQL sebagai `CASE WHEN`:
+
+```
+WIP    : CEILING(3600 / take_time  * (uptime / 60))  — deteksi WIP via NAMA mesin
+Normal : CEILING(3600 / cycle_time * cavity * (uptime / 60))
+take_time / cycle_time = 0 -> target 0
+```
+
+Kalau `ProductionCalculator.hitungTarget()` berubah, kedua query native di
+`ProductionRepository` WAJIB ikut diubah. Selalu bandingkan angka sebelum dan
+sesudah perubahan formula.
+
+## 47.5 Semantik Penghitungan (tidak berubah dari pola lama)
+
+- Kartu summary: satu produksi dihitung SEKALI jika salah satu dari ketiga
+  operatornya cocok dengan filter grup.
+- Baris per-operator: satu produksi dihitung untuk SETIAP operator yang
+  terlibat (kepemilikan bersama). Karena itu total kolom tabel operator
+  BISA lebih besar dari kartu summary — ini desain, bukan bug.
+
+## 47.6 Tahap Berikutnya (belum dikerjakan)
+
+Versi B: satu query `GROUP BY` untuk daftar operator menggantikan loop
+query per operator. Dikerjakan bila jumlah operator sudah membuat loop
+terasa lambat.

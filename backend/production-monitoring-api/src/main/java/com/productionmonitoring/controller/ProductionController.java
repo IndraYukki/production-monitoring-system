@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +65,7 @@ public class ProductionController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long customerId,
             @RequestParam(required = false) Long machineId,
+            @RequestParam(required = false) Long operatorId,
             @RequestParam(required = false) String shift,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -77,6 +79,7 @@ public class ProductionController {
         filter.setKeyword(keyword);
         filter.setCustomerId(customerId);
         filter.setMachineId(machineId);
+        filter.setOperatorId(operatorId);
         filter.setShift(shift);
         filter.setTanggalMulai(tanggalMulai);
         filter.setTanggalSelesai(tanggalSelesai);
@@ -85,8 +88,15 @@ public class ProductionController {
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        workbook.write(outputStream);
-        workbook.close();
+        try {
+            workbook.write(outputStream);
+        } finally {
+            // SXSSFWorkbook menaruh baris di file sementara — wajib dibersihkan
+            if (workbook instanceof SXSSFWorkbook streamingWorkbook) {
+                streamingWorkbook.dispose();
+            }
+            workbook.close();
+        }
 
         return ResponseEntity.ok()
                 .header(
@@ -101,6 +111,11 @@ public class ProductionController {
                 .body(outputStream.toByteArray());
     }
 
+
+    @GetMapping("/{idInput}")
+    public ProductionResponseDTO lihatLaporanById (@PathVariable Long idInput) {
+        return productionService.lihatReportById(idInput);
+    }
 
     @PostMapping
     public ProductionResponseDTO tambahLaporan (@Valid @RequestBody ProductionRequestDTO inputUser) {

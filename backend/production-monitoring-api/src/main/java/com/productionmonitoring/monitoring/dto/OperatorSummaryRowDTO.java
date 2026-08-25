@@ -10,10 +10,10 @@ public class OperatorSummaryRowDTO {
     private String operatorName;
     private String nik;
     private String groub;
-    private Integer totalOutput;
-    private Integer totalTarget;
-    private Integer totalOk;
-    private Integer totalWip;
-    private Integer achievePercent;
+    private Long totalOutput;
+    private Long totalTarget;
+    private Long totalOk;
+    private Long totalWip;
+    private Double achievePercent;
     private Integer totalLogs;
 }

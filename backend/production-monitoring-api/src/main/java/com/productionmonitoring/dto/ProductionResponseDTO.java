@@ -30,7 +30,8 @@ public class ProductionResponseDTO {
     private Integer totalNg;
     private Integer totalOutput;
     private Integer target;
-    private Integer achievePercent;
+    private Double achievePercent;
+    private Double ngRate;
     private String productionStatus;
     private String uptimeDisplay;
     private Integer inputJam;

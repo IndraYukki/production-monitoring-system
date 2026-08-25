@@ -1,5 +1,6 @@
 import { Search, ChevronDown, ArrowRight } from 'lucide-react'
 import SummaryTableSkeleton from './SummaryTableSkeleton'
+import { formatPercent } from '../../utils/format'
 
 const SummaryTable = ({
   pageData,
@@ -136,21 +137,7 @@ const SummaryTable = ({
               </th>
             </tr>
           </thead>
-          {/* <tbody className="divide-y divide-border">
-            {loading ? (
-              <tr>
-                <td colSpan={8} className="px-5 py-8 text-center text-muted">
-                  Memuat data operator...
-                </td>
-              </tr>
-            ) : pageData.content?.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="px-5 py-8 text-center text-muted">
-                  Tidak ada data operator ditemukan.
-                </td>
-              </tr>
-            ) : (
-              pageData.content?.map((op) => ( */}
+
               <tbody className="divide-y divide-border">
                 {loading ? (
                   <SummaryTableSkeleton count={jumlah} />
@@ -211,7 +198,7 @@ const SummaryTable = ({
                           : 'font-semibold text-danger'
                       }
                     >
-                      {op.achievePercent ?? 0}%
+                      {formatPercent(op.achievePercent)}
                     </span>
                   </td>
                   <td className="px-5 py-4 text-right">

@@ -8,6 +8,8 @@ import { Routes, Route } from 'react-router-dom'
 import SummaryOperatorManagement from './pages/summaryOperator/SummaryOperatorManagement'
 import OperatorDetailPage from './pages/summaryOperator/OperatorDetailPage'
 import DashboardLandingPage from './pages/DashboardLandingPage'
+import SummaryProductManagement from './pages/summaryProduct/SummaryProductManagement'
+import SummaryProductDetail from './pages/summaryProduct/SummaryProductDetail'
 
 function App() {
   return (
@@ -32,11 +34,22 @@ function App() {
             element={<SummaryOperatorManagement />}
           />
 
-          
           <Route
             path="/operator-summary/:operatorId"
             element={<OperatorDetailPage />}
           />
+
+          <Route
+            path="/product-summary"
+            element={<SummaryProductManagement />}
+          />
+
+          <Route 
+           path="/product-summary/:productId"
+           element={<SummaryProductDetail />} 
+          />
+
+          
 
           <Route
             path="/add-production"

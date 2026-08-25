@@ -5,6 +5,7 @@ import {
   getOperatorDetailCards,
   getOperatorDetailLogs,
 } from '../../services/summaryOperatorService'
+import { exportProductionExcel, getProductionById } from '../../services/productionService'
 import DetailCards from '../../components/summaryOperator/DetailCards'
 import DetailLogsTable from '../../components/summaryOperator/DetailLogsTable'
 import ProductionDetailModal from '../../components/production/ProductionDetailModal'
@@ -31,15 +32,26 @@ const OperatorDetailPage = () => {
 
   const [openDetailModal, setOpenDetailModal] = useState(false)
   const [selectedProduction, setSelectedProduction] = useState(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
 
 // ...
 
-    const handleOpenDetail = (log) => {
-      setSelectedProduction({
-        ...log,
-        id: log.productionId, // Memastikan prop id terbaca oleh ProductionDetailModal
-      })
-      setOpenDetailModal(true)
+    // OperatorDetailLogDTO sengaja ramping (tanpa defects/remark/customer/createdAt),
+    // jadi saat klik kita ambil ProductionResponseDTO lengkap dari /api/production/{id}
+    // supaya modal membaca field sesuai kontrak aslinya.
+    const handleOpenDetail = async (log) => {
+      if (loadingDetail) return
+      try {
+        setLoadingDetail(true)
+        const data = await getProductionById(log.productionId)
+        setSelectedProduction(data)
+        setOpenDetailModal(true)
+      } catch (error) {
+        console.error('Gagal memuat detail production:', error)
+        alert('Gagal memuat detail production')
+      } finally {
+        setLoadingDetail(false)
+      }
     }
 
   // API 3: Get Operator Detail Cards
@@ -89,6 +101,34 @@ const OperatorDetailPage = () => {
   useEffect(() => {
     fetchDetailLogs()
   }, [fetchDetailLogs])
+
+  // Export Excel untuk log operator yang sedang dibuka
+  const handleExport = async () => {
+    try {
+      const response = await exportProductionExcel({
+        operatorId,
+        tanggalMulai,
+        tanggalSelesai,
+      })
+
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `Raw Production - ${cardsData?.operatorName || `Operator ${operatorId}`}.xlsx`
+
+      document.body.appendChild(link)
+      link.click()
+
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Gagal export production operator:', error)
+    }
+  }
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -144,6 +184,7 @@ const OperatorDetailPage = () => {
           jumlah={jumlah}
           setJumlah={setJumlah}
           onRowClick={handleOpenDetail}
+          onExport={handleExport}
         />
         <ProductionDetailModal
           open={openDetailModal}

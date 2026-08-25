@@ -8,6 +8,7 @@ import {
   Clock,
   AlertTriangle,
 } from 'lucide-react'
+import { formatPercent } from '../../utils/format'
 
 function MiniStatCard({ label, value, detail, icon: Icon, tone = 'blue' }) {
   const toneClasses = {
@@ -80,7 +81,7 @@ export default function DetailCards({ cardsData, loading }) {
       />
       <MiniStatCard
         label="Achievement"
-        value={`${achievePercent}%`}
+        value={formatPercent(achievePercent)}
         detail="Total pencapaian"
         icon={TrendingUp}
         tone={achievePercent >= 100 ? 'green' : 'danger'}

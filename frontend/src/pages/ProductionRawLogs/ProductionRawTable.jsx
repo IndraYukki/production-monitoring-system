@@ -1,4 +1,5 @@
 import ProductionRawTableSkeleton from "../../components/production/ProductionRawTableSkeleton";
+import { formatPercent } from "../../utils/format";
 
 
 function ProductionRawTable({
@@ -298,7 +299,7 @@ function ProductionRawTable({
                 <td className="px-4 py-3 text-center whitespace-nowrap">
                   <div className="flex flex-col items-center gap-1">
                     <span className={`font-mono text-xs font-bold ${isTercapai ? 'text-success' : 'text-danger'}`}>
-                      {production.achievePercent ?? 0}%
+                      {formatPercent(production.achievePercent)}
                     </span>
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${

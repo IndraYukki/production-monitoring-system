@@ -77,3 +77,31 @@ Seluruh kalkulasi bisnis Wajib berada di Backend pada file:
    Jangan mengubah struktur Response DTO tanpa mengecek komponen React yang mengonsumsinya.
 4. **Backend Adalah Validasi Utama:**
    Frontend hanya untuk UX. Semua Business Rules, Validasi Nilai (`@NotNull`, `@NotBlank`), dan Kalkulasi adalah tanggung jawab penuh Backend.
+
+---
+
+## 8. PETA TEKNIS TERBARU (update 23 Agu 2026) — JANGAN DIDUPLIKASI
+
+### A. Sumber data & utility frontend (sudah tersedia, WAJIB reuse)
+- `frontend/src/constants/machines.js` — `MACHINES` + `findMachineById()`. **Jangan tulis ulang array mesin di komponen.**
+- `frontend/src/constants/ngDefects.js` — `NG_DEFECTS` (id 18 = `'LAIN-LAIN'`, sesuai database).
+- `frontend/src/utils/productionTarget.js` — `isWipMachine()` + `calculateTarget()`. Ini **cermin** `ProductionCalculator.hitungTarget()`; deteksi WIP via **NAMA mesin** (`'wip'`), bukan id. Kalau formula backend berubah, file ini WAJIB ikut diubah.
+- `frontend/src/utils/dateHelper.js` — `getTodayISO()` + `getFirstDayOfMonthISO()` memakai **waktu lokal**. JANGAN pakai `toISOString().split('T')[0]` — di zona WIB tanggalnya mundur 1 hari.
+
+### B. Agregasi summary monitoring
+- Ketiga endpoint summary (`/api/monitoring/operator-summary/cards`, `/operator-summary`, `/operator-summary/{id}/cards`) melakukan agregasi **di database** lewat native query `ProductionRepository.sumProductionForCards` / `sumProductionForOperator`. Java hanya menerima hasil akhir — JANGAN kembali ke pola "load semua entity lalu jumlah di loop".
+- ⚠️ Rumus target di dalam SQL kedua query itu adalah **CERMIN `ProductionCalculator.hitungTarget()`** — kalau rumus berubah, SQL WAJIB ikut diubah.
+- Field agregat DTO monitoring sudah `Long` (`totalOutput`, `totalTarget`, `totalOk`, `totalWip`, `totalNg`, `totalUptime`, `totalLogs`, `totalLogsAchieve`). Persentase (`achievePercent`, `totalAchieve`, `ngRate`) bertipe `Double` dengan 2 desimal — tampilan FE lewat `formatPercent()` di `src/utils/format.js`.
+- Semantik (TIDAK berubah): kartu summary menghitung produksi **sekali** bila salah satu operatornya cocok grup; baris per-operator menghitung produksi untuk **setiap** operator yang terlibat (kepemilikan bersama).
+- **Nama field beda antar DTO:** `ProductionResponseDTO` = `totalNg` + `productionStatus`; `OperatorDetailLogDTO` = `qtyNg` + `status`. Modal bersama (`ProductionDetailModal`) membaca nama milik `ProductionResponseDTO` — **kedua** halaman detail (operator & product) mengambil data modal lewat `GET /api/production/{id}` saat baris diklik, karena DTO log (`OperatorDetailLogDTO`, `ProductDetailLogDTO`) sengaja ramping (tanpa defects/remark/customerName/createdAt/groub). NG per baris di list operator dihitung lewat `sumNgPerProductionIds` (satu query agregat) — BUKAN lazy-load defects per baris. Jangan "menyamakan" nama field tanpa cek kedua consumer.
+- **Product Summary** (`/api/monitoring/product-summary/*`): pola agregasi sama (Versi A). DTO-nya: `ProductSummaryCardDTO` (totalNgRate/totalAchieve + `totalUptime`/`uptimeDisplay`), `ProductSummaryRowDTO` (ngRate/achievePct + `totalUptime`/`uptimeDisplay`), `ProductDetailCardDTO`, `ProductDetailLogDTO` (**tidak** membawa defects/remark/customerName/createdAt), plus chart DTO `defectName`+`totalNg`. Filter halaman utama: tanggal + `machineId` + `customerId` (opsional, WHERE di 3 native query utama — `sumNgPerDefectGlobal` ikut join `products` untuk filter customer). Sorting list dilakukan di Java (`ProductSummaryService.sort()`) — kolom sortable baru wajib ditambah case di switch (termasuk `customerName`). ⚠️ `findLogsForProductDetail` adalah native query dengan ORDER BY sendiri — JANGAN kirim Sort lewat Pageable (Spring Data menolak dynamic sorting di native query).
+- **Export Excel** (`GET /api/production/export`): filter + agregasi NG + rumus target dihitung **PostgreSQL** (`ProductionRepository.findRowsForExport` — proyeksi `Object[]` ringan, BUKAN entity penuh + relasi), lalu `ProductionExcelExporter` menulis `SXSSFWorkbook` sambil stream (fetchSize 1000). Filter opsional termasuk `operatorId` (kepemilikan bersama: `operator1/2/3_id = :operatorId` OR) — dipakai tombol export di halaman detail operator. Achieve %, NG Rate %, dan Status dihitung di Java lewat overload agregat `ProductionCalculator.hitungAchieve(long,long)` / `hitungNgRate(long,long)` — TIDAK diduplikasi di SQL. ⚠️ Rumus target di SQL query itu adalah CERMIN `hitungTarget()` — kalau berubah, SQL WAJIB ikut diubah. Urutan kolom `Object[]` terikat kontrak dengan `ProductionExcelExporter` — jangan diubah sepihak. `ORDER BY p.id` (dulu tanpa order). ⚠️ Controller wajib `dispose()` workbook (file sementara SXSSF).
+
+### C. Keputusan yang masih MENUNGGU (belum dikerjakan)
+- Aturan "tidak target ⇒ remark wajib" **belum** diimplementasi di backend (pilihan belum diputus: auto-fill vs reject).
+- `MACHINES` / `NG_DEFECTS` masih hardcode di FE (ideal: ambil dari API `/machines` & master NG defect — risiko dropdown kosong kalau API mati, belum diputuskan).
+- Heap JVM belum diset (`-Xmx3g` disarankan untuk RAM 8 GB).
+
+### D. Rencana PR — Unifikasi Table Skeleton
+- **Status:** belum dikerjakan. Saat ini ada 5 skeleton terpisah: `SummaryTableSkeleton`, `DetailLogsTableSkeleton`, `ProductionRawTableSkeleton`, `SummaryProductTableSkeleton`, `SummaryProductDetailTableSkeleton`.
+- **Rencana:** refactor menjadi SATU komponen skeleton bersama berbasis props (jumlah baris `count`, tata letak/lebar kolom, avatar/badge opsional) — supaya halaman/tabel baru TIDAK perlu membuat file skeleton baru lagi.

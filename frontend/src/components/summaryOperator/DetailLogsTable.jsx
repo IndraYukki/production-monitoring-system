@@ -1,5 +1,6 @@
 import { ChevronDown } from 'lucide-react'
 import DetailLogsTableSkeleton from './DetailLogsTableSkeleton'
+import { formatPercent } from '../../utils/format'
 
 export default function DetailLogsTable({
   pageData,
@@ -9,6 +10,7 @@ export default function DetailLogsTable({
   jumlah,
   setJumlah,
   onRowClick,
+  onExport,
 }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
@@ -22,6 +24,14 @@ export default function DetailLogsTable({
         </div>
 
         <div className="flex items-center gap-2 text-sm text-muted">
+          <button
+            type="button"
+            onClick={onExport}
+            className="rounded-xl bg-info px-4 py-2.5 text-foreground font-semibold transition hover:opacity-90 hover:cursor-pointer"
+          >
+            Export Excel
+          </button>
+
           <span>Rows</span>
           <div className="relative">
             <select
@@ -50,7 +60,7 @@ export default function DetailLogsTable({
               <th className="px-5 py-3 font-medium">Part Product</th>
               <th className="px-5 py-3 font-medium">Machine & Shift</th>
               <th className="px-5 py-3 font-medium">OK / WIP</th>
-              <th className="px-5 py-3 font-medium text-danger">Total NG</th>
+              <th className="px-5 py-3 font-medium">Total NG</th>
               <th className="px-5 py-3 font-medium">Total Output</th>
               <th className="px-5 py-3 font-medium">Target</th>
               <th className="px-5 py-3 font-medium">Uptime</th>
@@ -106,7 +116,7 @@ export default function DetailLogsTable({
                       </span>
                     </td>
                     <td className="px-5 py-4 font-medium text-danger">
-                      {((log.totalOutput ?? 0) - ((log.qtyOk ?? 0) + (log.qtyWip ?? 0))).toLocaleString('id-ID')}
+                      {(log.qtyNg ?? 0).toLocaleString('id-ID')}
                     </td>
                     <td className="px-5 py-4 font-medium text-foreground">
                       {(log.totalOutput ?? 0).toLocaleString('id-ID')}
@@ -119,7 +129,7 @@ export default function DetailLogsTable({
                     </td>
                     <td className="px-5 py-4">
                       <span className={isTercapai ? 'font-semibold text-success' : 'font-semibold text-danger'}>
-                        {log.achievePercent ?? 0}%
+                        {formatPercent(log.achievePercent)}
                       </span>
                     </td>
                     <td className="px-5 py-4">

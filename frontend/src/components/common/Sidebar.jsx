@@ -155,6 +155,30 @@ function Sidebar() {
           </NavLink>
 
           <NavLink
+            to="/product-summary"
+            onClick={closeSidebar}
+            className={({ isActive }) =>
+              `
+                flex items-center gap-3 rounded-xl px-4 py-3
+                text-sm font-medium transition
+                ${
+                  isActive
+                    ? 'bg-info/10 text-info'
+                    : 'text-muted hover:bg-card-secondary hover:text-foreground'
+                }
+              `
+            }
+          >
+
+            <ChartArea size={20} />
+
+            <span>
+              Summary Product
+            </span>
+
+          </NavLink>
+
+          <NavLink
             to="/add-production"
             onClick={closeSidebar}
             className={({ isActive }) =>

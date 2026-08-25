@@ -6,15 +6,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OperatorDetailCardDTO {
-    private Integer totalOutput;
-    private Integer totalOk;
-    private Integer totalWip;
-    private Integer totalNg;
-    private Integer totalTarget;
-    private Integer achievePercent;
-    private Integer totalUptime;
-    private Integer totalLogs;
-    private Integer totalLogsAchieve;
+    private Long totalOutput;
+    private Long totalOk;
+    private Long totalWip;
+    private Long totalNg;
+    private Long totalTarget;
+    private Double achievePercent;
+    private Long totalUptime;
+    private Long totalLogs;
+    private Long totalLogsAchieve;
     private String uptimeDisplay;
     private String operatorName;
     private String nik;

@@ -35,6 +35,13 @@ export const createProduction = async (payload) => {
   return response.data
 }
 
+// GET satu laporan produksi lengkap (ProductionResponseDTO) — dipakai
+// modal detail di halaman summary yang list-nya memakai DTO ramping.
+export const getProductionById = async (id) => {
+  const response = await api.get(`/production/${id}`)
+  return response.data
+}
+
 
 
 
@@ -45,6 +52,7 @@ export const exportProductionExcel = async ({
   keyword = '',
   customerId = '',
   machineId = '',
+  operatorId = '',
   shift = '',
   tanggalMulai = '',
   tanggalSelesai = '',
@@ -54,6 +62,7 @@ export const exportProductionExcel = async ({
       keyword: keyword || undefined,
       customerId: customerId || undefined,
       machineId: machineId || undefined,
+      operatorId: operatorId || undefined,
       shift: shift || undefined,
       tanggalMulai: tanggalMulai || undefined,
       tanggalSelesai: tanggalSelesai || undefined,

@@ -22,12 +22,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.productionmonitoring.dto.ProductionFilterDTO;
 import com.productionmonitoring.specification.ProductionSpecificationBuilder;
 
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 
 @Service
@@ -82,23 +84,30 @@ public class ProductionService {
                 .map(this::toResponseDTO);
     }
 
+    @Transactional(readOnly = true)
     public Workbook exportExcel(ProductionFilterDTO filter) {
 
-        Specification<Production> specification =
-                specificationBuilder.build(filter);
+        // Keyword/shift blank = "tidak difilter" — sama seperti Specification builder lama
+        String keyword = (filter.getKeyword() != null && !filter.getKeyword().isBlank())
+                ? filter.getKeyword() : null;
+        String shift = (filter.getShift() != null && !filter.getShift().isBlank())
+                ? filter.getShift() : null;
 
-        List<Production> productions;
-
-        if (specification == null) {
-            productions = productionRepository.findAll();
-        } else {
-            productions = productionRepository.findAll(specification);
+        // Filter + agregasi NG + rumus target dihitung oleh PostgreSQL (native query).
+        // Java hanya menerima baris proyeksi ringan (Object[]) — bukan entity penuh —
+        // lalu menulisnya ke Excel sambil streaming.
+        try (Stream<Object[]> rows = productionRepository.findRowsForExport(
+                keyword,
+                filter.getCustomerId(),
+                filter.getMachineId(),
+                filter.getOperatorId(),
+                shift,
+                filter.getTanggalMulai(),
+                filter.getTanggalSelesai()
+        )) {
+            ProductionExcelExporter exporter = new ProductionExcelExporter();
+            return exporter.export(rows);
         }
-
-        ProductionExcelExporter exporter =
-                new ProductionExcelExporter();
-
-        return exporter.export(productions);
     }
 
     public ProductionResponseDTO tambahReport(ProductionRequestDTO inputUser) {
@@ -107,6 +116,12 @@ public class ProductionService {
         isiDataProductionDariDTO(production, inputUser);
 
         return toResponseDTO(productionRepository.save(production));
+    }
+
+    public ProductionResponseDTO lihatReportById (Long id) {
+        Production dataReport = productionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("data tidak ditemukan"));
+        return toResponseDTO(dataReport);
     }
 
     public String hapusReport (Long id) {
@@ -251,13 +266,14 @@ public class ProductionService {
         int totalNg    = ProductionCalculator.hitungTotalNg(production);
         int totalOutput = ProductionCalculator.hitungOutput(production);
         int target     = ProductionCalculator.hitungTarget(production);
-        int achieve    = ProductionCalculator.hitungAchieve(totalOutput, target);
+        double achieve = ProductionCalculator.hitungAchieve(totalOutput, target);
 
         dto.setTotalNg(totalNg);
         dto.setTotalOutput(totalOutput);
         dto.setTarget(target);
         dto.setAchievePercent(achieve);
         dto.setProductionStatus(ProductionCalculator.hitungStatus(totalOutput, target));
+        dto.setNgRate(ProductionCalculator.hitungNgRate(production));
         dto.setUptimeDisplay(ProductionCalculator.formatUptime(production.getUptimeMc()));
         dto.setInputJam(production.getUptimeMc() != null ? production.getUptimeMc() / 60 : 0);
         dto.setInputMenit(production.getUptimeMc() != null ? production.getUptimeMc() % 60 : 0);

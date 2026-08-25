@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OperatorSummaryCardDTO {
-    private Integer totalOutput;
-    private Integer totalTarget;
-    private Integer totalAchieve;
+    private Long totalOutput;
+    private Long totalTarget;
+    private Double totalAchieve;
 }

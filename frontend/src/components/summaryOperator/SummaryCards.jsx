@@ -1,4 +1,5 @@
 import { ClipboardList, Target, CheckCircle2 } from 'lucide-react'
+import { formatPercent } from '../../utils/format'
 
 function StatCard({ label, value, detail, icon: Icon, tone }) {
   const toneClasses = {
@@ -46,7 +47,7 @@ export default function SummaryCards({ cardsData, loading }) {
       />
       <StatCard
         label="Achievement"
-        value={loading ? '...' : `${cardsData?.totalAchieve ?? 0}%`}
+        value={loading ? '...' : formatPercent(cardsData?.totalAchieve)}
         detail="Total Pencapaian"
         icon={CheckCircle2}
         tone="green"

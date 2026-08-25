@@ -38,9 +38,10 @@ public class ProductionCalculator {
         }
     }
 
-    public static int hitungAchieve(int output, int target) {
+    public static double hitungAchieve(long output, long target) {
         if (target == 0) return 0;
-        return (int) Math.floor((double) output / target * 100);
+        // 2 desimal, misal 98.57 — int + floor lama membuat 99.7% tampil sebagai 99%
+        return Math.round((double) output / target * 10000.0) / 100.0;
     }
 
     public static String hitungStatus(int output, int target) {
@@ -57,10 +58,17 @@ public class ProductionCalculator {
         return jam + " jam " + menit + " menit";
     }
 
-    public static int hitungNgRate(Production p) {
-        int totalNg = hitungTotalNg(p);
-        int totalOutput = hitungOutput(p);
+    public static double hitungNgRate(Production p) {
+        return hitungNgRate(hitungTotalNg(p), hitungOutput(p));
+    }
+
+    /**
+     * Versi overload untuk hasil agregasi (misal dari query SUM database)
+     * yang sudah berupa total NG dan total output, tanpa entity Production.
+     */
+    public static double hitungNgRate(long totalNg, long totalOutput) {
         if (totalOutput == 0) return 0;
-        return (int) Math.floor((double) totalNg / totalOutput * 100);
+        // 2 desimal, misal 0.83 — int + floor lama membuat 0.8% tampil sebagai 0%
+        return Math.round((double) totalNg / totalOutput * 10000.0) / 100.0;
     }
 }

@@ -1,6 +1,5 @@
 package com.productionmonitoring.monitoring;
 
-import com.productionmonitoring.dto.QtyDefectResponseDTO;
 import com.productionmonitoring.monitoring.dto.OperatorDetailCardDTO;
 import com.productionmonitoring.monitoring.dto.OperatorSummaryCardDTO;
 import com.productionmonitoring.monitoring.dto.OperatorSummaryRowDTO;
@@ -17,6 +16,8 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OperatorSummaryService {
@@ -38,23 +39,19 @@ public class OperatorSummaryService {
             LocalDate tanggalSelesai,
             String groub
     ) {
-        List<Production> productions = productionRepository
-                .findByLotRange(tanggalMulai, tanggalSelesai);
+        List<Object[]> hasil = productionRepository
+                .sumProductionForCards(tanggalMulai, tanggalSelesai, groub);
 
-        int totalOutput = 0;
-        int totalTarget = 0;
+        long totalOutput = 0;
+        long totalTarget = 0;
 
-        for (Production p : productions) {
-            if (p.getProduct() == null || p.getMachine() == null) continue;
-            if (!operatorMatchGroub(p, groub)) continue;
-
-            totalOutput += ProductionCalculator.hitungOutput(p);
-            totalTarget += ProductionCalculator.hitungTarget(p);
+        if (!hasil.isEmpty()) {
+            Object[] baris = hasil.get(0);
+            totalOutput = ((Number) baris[0]).longValue();
+            totalTarget = ((Number) baris[1]).longValue();
         }
 
-        int achievePercent = totalTarget > 0
-                ? (int) Math.floor((double) totalOutput / totalTarget * 100)
-                : 0;
+        double achievePercent = ProductionCalculator.hitungAchieve(totalOutput, totalTarget);
 
         OperatorSummaryCardDTO dto = new OperatorSummaryCardDTO();
         dto.setTotalOutput(totalOutput);
@@ -81,26 +78,23 @@ public class OperatorSummaryService {
         List<OperatorSummaryRowDTO> rows = new ArrayList<>();
 
         for (Operator operator : operators) {
-            List<Production> productions = productionRepository
-                    .findByOperatorAndLotRange(operator.getId(), tanggalMulai, tanggalSelesai);
+            List<Object[]> hasil = productionRepository
+                    .sumProductionForOperator(operator.getId(), tanggalMulai, tanggalSelesai);
 
-            if (productions.isEmpty()) continue;
+            if (hasil.isEmpty()) continue;
 
-            int totalOk = 0, totalWip = 0, totalOutput = 0, totalTarget = 0;
-            int totalLogs = 0;
+            Object[] baris = hasil.get(0);
 
-            for (Production p : productions) {
-                if (p.getProduct() == null || p.getMachine() == null) continue;
-                totalOk     += p.getQtyOk() != null ? p.getQtyOk() : 0;
-                totalWip    += p.getQtyWip() != null ? p.getQtyWip() : 0;
-                totalOutput += ProductionCalculator.hitungOutput(p);
-                totalTarget += ProductionCalculator.hitungTarget(p);
-                totalLogs++;
-            }
+            // Urutan kolom ditentukan di ProductionRepository.sumProductionForOperator
+            long totalOk     = ((Number) baris[0]).longValue();
+            long totalWip    = ((Number) baris[1]).longValue();
+            long totalOutput = ((Number) baris[2]).longValue();
+            long totalTarget = ((Number) baris[3]).longValue();
+            long totalLogs   = ((Number) baris[5]).longValue();
 
-            int achievePercent = totalTarget > 0
-                    ? (int) Math.floor((double) totalOutput / totalTarget * 100)
-                    : 0;
+            if (totalLogs == 0) continue;
+
+            double achievePercent = ProductionCalculator.hitungAchieve(totalOutput, totalTarget);
 
             OperatorSummaryRowDTO row = new OperatorSummaryRowDTO();
             row.setOperatorId(operator.getId());
@@ -112,7 +106,7 @@ public class OperatorSummaryService {
             row.setTotalOutput(totalOutput);
             row.setTotalTarget(totalTarget);
             row.setAchievePercent(achievePercent);
-            row.setTotalLogs(totalLogs);
+            row.setTotalLogs((int) totalLogs);
             rows.add(row);
         }
         Comparator<OperatorSummaryRowDTO> comparator = switch (sortBy) {
@@ -157,27 +151,34 @@ public class OperatorSummaryService {
 
         Pageable pageable = PageRequest.of(halaman, jumlah, Sort.by(direction, safeSortBy));
 
-        return productionRepository
-                .findByOperatorAndLotRange(operatorId, tanggalMulai, tanggalSelesai, pageable)
-                .map(this::toDetailLogDTO);
+        Page<Production> page = productionRepository
+                .findByOperatorAndLotRange(operatorId, tanggalMulai, tanggalSelesai, pageable);
+
+        // Total NG per production — satu query agregat, BUKAN lazy-load
+        // collection defects per baris (menghindari N+1).
+        List<Long> ids = page.getContent().stream()
+                .map(Production::getId)
+                .toList();
+
+        Map<Long, Integer> ngMap = ids.isEmpty()
+                ? Map.of()
+                : productionRepository.sumNgPerProductionIds(ids).stream()
+                        .collect(Collectors.toMap(
+                                r -> ((Number) r[0]).longValue(),
+                                r -> ((Number) r[1]).intValue(),
+                                (a, b) -> a
+                        ));
+
+        List<OperatorDetailLogDTO> list = page.getContent().stream()
+                .map(p -> toDetailLogDTO(p, ngMap.getOrDefault(p.getId(), 0)))
+                .toList();
+
+        return new PageImpl<>(list, pageable, page.getTotalElements());
     }
 
     // ─── HELPER ──────────────────────────────────────────────────
 
-    private boolean operatorMatchGroub(Production p, String groub) {
-        // Cek apakah salah satu operator di production record match groub
-        List<Operator> ops = new ArrayList<>();
-        if (p.getOperator1() != null) ops.add(p.getOperator1());
-        if (p.getOperator2() != null) ops.add(p.getOperator2());
-        if (p.getOperator3() != null) ops.add(p.getOperator3());
-
-        if (groub == null || groub.isBlank()) {
-            return ops.stream().anyMatch(o -> !"RESIGN".equalsIgnoreCase(o.getGroub()));
-        }
-        return ops.stream().anyMatch(o -> groub.equalsIgnoreCase(o.getGroub()));
-    }
-
-    private OperatorDetailLogDTO toDetailLogDTO(Production p) {
+    private OperatorDetailLogDTO toDetailLogDTO(Production p, int totalNg) {
         OperatorDetailLogDTO dto = new OperatorDetailLogDTO();
         dto.setProductionId(p.getId());
         dto.setShift(p.getShift());
@@ -192,58 +193,16 @@ public class OperatorSummaryService {
         if (p.getMachine() != null) {
             dto.setMachineName(p.getMachine().getName());
         }
-        // Customer
-        if (p.getProduct() != null && p.getProduct().getCustomer() != null) {
-            dto.setCustomerId(p.getProduct().getCustomer().getId());
-            dto.setCustomerName(p.getProduct().getCustomer().getCustomer());
-        }
-
-// Operator
-        if (p.getOperator1() != null) {
-            dto.setOperator1Id(p.getOperator1().getId());
-            dto.setOperator1Name(p.getOperator1().getName());
-            dto.setGroub1(p.getOperator1().getGroub());
-        }
-        if (p.getOperator2() != null) {
-            dto.setOperator2Id(p.getOperator2().getId());
-            dto.setOperator2Name(p.getOperator2().getName());
-            dto.setGroub2(p.getOperator2().getGroub());
-        }
-        if (p.getOperator3() != null) {
-            dto.setOperator3Id(p.getOperator3().getId());
-            dto.setOperator3Name(p.getOperator3().getName());
-            dto.setGroub3(p.getOperator3().getGroub());
-        }
-
-        // Remark & Defects
-        dto.setRemark(p.getRemark());
-        if (p.getDefects() != null) {
-            dto.setDefects(p.getDefects().stream()
-                    .map(d -> {
-                        QtyDefectResponseDTO defectDTO = new QtyDefectResponseDTO();
-                        defectDTO.setId(d.getId());
-                        defectDTO.setQtyNg(d.getQtyNg());
-                        if (d.getNgDefect() != null) {
-                            defectDTO.setNgDefectId(d.getNgDefect().getId());
-                            defectDTO.setNgDefectName(d.getNgDefect().getName());
-                        }
-                        return defectDTO;
-                    })
-                    .toList());
-        }
 
         int ok     = p.getQtyOk()  != null ? p.getQtyOk()  : 0;
         int wip    = p.getQtyWip() != null ? p.getQtyWip() : 0;
-        int ng = ProductionCalculator.hitungTotalNg(p);
-        int output = ok + wip + ng;
+        int output = ok + wip + totalNg;
         int target = ProductionCalculator.hitungTarget(p);
-        int achieve = target > 0
-                ? (int) Math.floor((double) output / target * 100)
-                : 0;
+        double achieve = ProductionCalculator.hitungAchieve(output, target);
 
         dto.setQtyOk(ok);
         dto.setQtyWip(wip);
-        dto.setQtyNg(ng);
+        dto.setQtyNg(totalNg);
         dto.setTotalOutput(output);
         dto.setTarget(target);
         dto.setAchievePercent(achieve);
@@ -256,36 +215,32 @@ public class OperatorSummaryService {
             LocalDate tanggalMulai,
             LocalDate tanggalSelesai
     ) {
-        List<Production> productions = productionRepository
-                .findByOperatorAndLotRange(operatorId, tanggalMulai, tanggalSelesai);
         Operator operator = operatorRepository.findById(operatorId)
                 .orElseThrow(() -> new RuntimeException("Operator tidak ditemukan"));
 
-        int totalOk = 0, totalWip = 0, totalNg = 0;
-        int totalOutput = 0, totalTarget = 0, totalUptime = 0;
-        int totalLogs = 0, totalLogsAchieve = 0;
+        List<Object[]> hasil = productionRepository
+                .sumProductionForOperator(operatorId, tanggalMulai, tanggalSelesai);
 
-        for (Production p : productions) {
-            if (p.getProduct() == null || p.getMachine() == null) continue;
+        long totalOk = 0, totalWip = 0, totalOutput = 0, totalTarget = 0;
+        long totalUptime = 0, totalLogs = 0, totalLogsAchieve = 0;
 
-            int ok  = p.getQtyOk()  != null ? p.getQtyOk()  : 0;
-            int wip = p.getQtyWip() != null ? p.getQtyWip() : 0;
-            int ng = ProductionCalculator.hitungTotalNg(p);
-            int output = ok + wip + ng;
-            int target = ProductionCalculator.hitungTarget(p);
-            totalOk     += ok;
-            totalWip    += wip;
-            totalNg     += ng;
-            totalOutput += output;
-            totalTarget += target;
-            totalUptime += p.getUptimeMc() != null ? p.getUptimeMc() : 0;
-            totalLogs++;
-            if (output >= target) totalLogsAchieve++;
+        if (!hasil.isEmpty()) {
+            Object[] baris = hasil.get(0);
+
+            // Urutan kolom ditentukan di ProductionRepository.sumProductionForOperator
+            totalOk          = ((Number) baris[0]).longValue();
+            totalWip         = ((Number) baris[1]).longValue();
+            totalOutput      = ((Number) baris[2]).longValue();
+            totalTarget      = ((Number) baris[3]).longValue();
+            totalUptime      = ((Number) baris[4]).longValue();
+            totalLogs        = ((Number) baris[5]).longValue();
+            totalLogsAchieve = ((Number) baris[6]).longValue();
         }
 
-        int achievePercent = totalTarget > 0
-                ? (int) Math.floor((double) totalOutput / totalTarget * 100)
-                : 0;
+        // output = ok + wip + ng  ->  ng = output - ok - wip
+        long totalNg = totalOutput - totalOk - totalWip;
+
+        double achievePercent = ProductionCalculator.hitungAchieve(totalOutput, totalTarget);
 
         OperatorDetailCardDTO dto = new OperatorDetailCardDTO();
         dto.setTotalOk(totalOk);
@@ -297,7 +252,7 @@ public class OperatorSummaryService {
         dto.setTotalLogs(totalLogs);
         dto.setTotalLogsAchieve(totalLogsAchieve);
         dto.setAchievePercent(achievePercent);
-        dto.setUptimeDisplay(ProductionCalculator.formatUptime(totalUptime));
+        dto.setUptimeDisplay(ProductionCalculator.formatUptime((int) totalUptime));
         dto.setOperatorName(operator.getName());
         dto.setNik(operator.getNik());
         dto.setGroub(operator.getGroub());
