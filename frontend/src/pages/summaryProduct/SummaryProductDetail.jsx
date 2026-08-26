@@ -24,6 +24,9 @@ export default function SummaryProductDetail() {
   const tanggalMulai = location.state?.tanggalMulai || getFirstDayOfMonthISO()
   const tanggalSelesai = location.state?.tanggalSelesai || getTodayISO()
   const machineId = location.state?.machineId || null
+  // Filter "All Machines" (buang WIP) ikut dibawa dari Page 1
+  // supaya angka di halaman detail konsisten dengan halaman utama.
+  const excludeWip = location.state?.excludeWip || false
 
   // State Pagination & Sorting
   const [halaman, setHalaman] = useState(0)
@@ -71,6 +74,7 @@ export default function SummaryProductDetail() {
         tanggalMulai,
         tanggalSelesai,
         machineId,
+        excludeWip,
       })
       setCardsData(data)
     } catch (error) {
@@ -78,7 +82,7 @@ export default function SummaryProductDetail() {
     } finally {
       setLoadingCards(false)
     }
-  }, [productId, tanggalMulai, tanggalSelesai, machineId])
+  }, [productId, tanggalMulai, tanggalSelesai, machineId, excludeWip])
 
   // API 5: Get Product Detail NG Chart
   const fetchDetailChart = useCallback(async () => {
@@ -89,6 +93,7 @@ export default function SummaryProductDetail() {
         tanggalMulai,
         tanggalSelesai,
         machineId,
+        excludeWip,
       })
       setChartData(data || [])
     } catch (error) {
@@ -96,7 +101,7 @@ export default function SummaryProductDetail() {
     } finally {
       setLoadingChart(false)
     }
-  }, [productId, tanggalMulai, tanggalSelesai, machineId])
+  }, [productId, tanggalMulai, tanggalSelesai, machineId, excludeWip])
 
   // API 6: Get Product Detail Logs
   const fetchDetailLogs = useCallback(async () => {
@@ -107,6 +112,7 @@ export default function SummaryProductDetail() {
         tanggalMulai,
         tanggalSelesai,
         machineId,
+        excludeWip,
         halaman,
         jumlah,
         sortBy: sortConfig.sortBy,
@@ -122,7 +128,7 @@ export default function SummaryProductDetail() {
     } finally {
       setLoadingTable(false)
     }
-  }, [productId, tanggalMulai, tanggalSelesai, machineId, halaman, jumlah, sortConfig])
+  }, [productId, tanggalMulai, tanggalSelesai, machineId, excludeWip, halaman, jumlah, sortConfig])
 
   useEffect(() => {
     fetchDetailCards()

@@ -22,8 +22,17 @@ export default function SummaryProductManagement() {
   // State Filters
   const [tanggalMulai, setTanggalMulai] = useState(getFirstDayOfMonthISO())
   const [tanggalSelesai, setTanggalSelesai] = useState(getTodayISO())
-  const [machineId, setMachineId] = useState(null)
+  // Filter mesin:
+  //   ''            → All Category (semua produksi, termasuk WIP)
+  //   'allMachines' → All Machines (semua mesin KECUALI WIP)
+  //   selain itu    → id mesin tertentu (WIP, MC-1, ...)
+  const [machineFilter, setMachineFilter] = useState('')
   const [customerId, setCustomerId] = useState(null)
+
+  // Turunan dari machineFilter — dipakai sebagai param API
+  const machineId =
+    machineFilter && machineFilter !== 'allMachines' ? Number(machineFilter) : null
+  const excludeWip = machineFilter === 'allMachines'
   const [keyword, setKeyword] = useState('')
 
   // Daftar customer untuk dropdown filter
@@ -93,6 +102,7 @@ export default function SummaryProductManagement() {
         tanggalSelesai,
         machineId,
         customerId,
+        excludeWip,
       })
       setCardsData(
         data || {
@@ -110,7 +120,7 @@ export default function SummaryProductManagement() {
     } finally {
       setLoadingCards(false)
     }
-  }, [tanggalMulai, tanggalSelesai, machineId, customerId])
+  }, [tanggalMulai, tanggalSelesai, machineFilter, customerId])
 
   // API 2: Fetch NG Chart
   const fetchChart = useCallback(async () => {
@@ -121,6 +131,7 @@ export default function SummaryProductManagement() {
         tanggalSelesai,
         machineId,
         customerId,
+        excludeWip,
       })
       setChartData(data || [])
     } catch (error) {
@@ -128,7 +139,7 @@ export default function SummaryProductManagement() {
     } finally {
       setLoadingChart(false)
     }
-  }, [tanggalMulai, tanggalSelesai, machineId, customerId])
+  }, [tanggalMulai, tanggalSelesai, machineFilter, customerId])
 
   // API 3: Fetch Table List
   const fetchTable = useCallback(async () => {
@@ -139,6 +150,7 @@ export default function SummaryProductManagement() {
         tanggalSelesai,
         machineId,
         customerId,
+        excludeWip,
         keyword,
         halaman,
         jumlah,
@@ -158,7 +170,7 @@ export default function SummaryProductManagement() {
   }, [
     tanggalMulai,
     tanggalSelesai,
-    machineId,
+    machineFilter,
     customerId,
     keyword,
     halaman,
@@ -181,7 +193,7 @@ export default function SummaryProductManagement() {
   // Navigasi ke Page 2 (Detail Produk)
   const handleRowClick = (productId) => {
     navigate(`/product-summary/${productId}`, {
-      state: { tanggalMulai, tanggalSelesai, machineId },
+      state: { tanggalMulai, tanggalSelesai, machineId, excludeWip },
     })
   }
 
@@ -220,15 +232,15 @@ export default function SummaryProductManagement() {
               <div className="flex items-center gap-2 w-full sm:w-72">
                 <Cpu className="size-4 shrink-0 text-muted" />
                 <select
-                  value={machineId || ''}
+                  value={machineFilter}
                   onChange={(e) => {
-                    const val = e.target.value
-                    setMachineId(val ? Number(val) : null)
+                    setMachineFilter(e.target.value)
                     setHalaman(0)
                   }}
                   className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition focus:border-info"
                 >
-                  <option value="">Semua Mesin (All Machines)</option>
+                  <option value="">All Category</option>
+                  <option value="allMachines">All Machines</option>
                   {MACHINES.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}

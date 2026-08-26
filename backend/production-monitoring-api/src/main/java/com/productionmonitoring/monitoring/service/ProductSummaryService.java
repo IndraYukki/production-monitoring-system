@@ -31,10 +31,11 @@ public class ProductSummaryService {
      * Cards agregat global — total output, target, NG, NG rate, achieve, uptime.
      */
     public ProductSummaryCardDTO getSummaryCards(
-            LocalDate mulai, LocalDate selesai, Long machineId, Long customerId) {
+            LocalDate mulai, LocalDate selesai, Long machineId, Long customerId,
+            boolean excludeWip) {
 
         List<Object[]> rows = productionRepository
-                .sumProductionCardsGlobal(mulai, selesai, machineId, customerId);
+                .sumProductionCardsGlobal(mulai, selesai, machineId, customerId, excludeWip);
 
         if (rows.isEmpty()) {
             return new ProductSummaryCardDTO(0L, 0L, 0L, 0.0, 0.0, 0L, "0 menit");
@@ -59,10 +60,11 @@ public class ProductSummaryService {
      * Chart NG — distribusi per jenis defect, scope filter tanggal + mesin + customer.
      */
     public List<ProductSummaryChartDTO> getChartNg(
-            LocalDate mulai, LocalDate selesai, Long machineId, Long customerId) {
+            LocalDate mulai, LocalDate selesai, Long machineId, Long customerId,
+            boolean excludeWip) {
 
         return productionRepository
-                .sumNgPerDefectGlobal(mulai, selesai, machineId, customerId)
+                .sumNgPerDefectGlobal(mulai, selesai, machineId, customerId, excludeWip)
                 .stream()
                 .map(r -> new ProductSummaryChartDTO(
                         (String) r[0],
@@ -78,10 +80,11 @@ public class ProductSummaryService {
      */
     public Page<ProductSummaryRowDTO> getSummaryList(
             LocalDate mulai, LocalDate selesai, Long machineId, Long customerId,
-            String keyword, Pageable pageable, String sortBy, String sortDir) {
+            String keyword, boolean excludeWip,
+            Pageable pageable, String sortBy, String sortDir) {
 
         List<Object[]> rows = productionRepository
-                .sumProductionPerProduct(mulai, selesai, machineId, customerId, keyword);
+                .sumProductionPerProduct(mulai, selesai, machineId, customerId, excludeWip, keyword);
 
         List<ProductSummaryRowDTO> list = rows.stream().map(r -> {
             long totalOk     = toLong(r[4]);
@@ -137,14 +140,15 @@ public class ProductSummaryService {
      * Cards agregat satu produk.
      */
     public ProductDetailCardDTO getDetailCards(
-            Long productId, LocalDate mulai, LocalDate selesai, Long machineId) {
+            Long productId, LocalDate mulai, LocalDate selesai,
+            Long machineId, boolean excludeWip) {
 
         Products product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Product tidak ditemukan: " + productId));
 
         List<Object[]> rows = productionRepository
-                .sumProductionForProductDetail(productId, mulai, selesai, machineId);
+                .sumProductionForProductDetail(productId, mulai, selesai, machineId, excludeWip);
 
         if (rows.isEmpty()) {
             return emptyDetailCard(product);
@@ -186,10 +190,11 @@ public class ProductSummaryService {
      * Chart NG per jenis defect — scope satu produk.
      */
     public List<ProductDetailChartDTO> getDetailChartNg(
-            Long productId, LocalDate mulai, LocalDate selesai, Long machineId) {
+            Long productId, LocalDate mulai, LocalDate selesai,
+            Long machineId, boolean excludeWip) {
 
         return productionRepository
-                .sumNgPerDefectForProduct(productId, mulai, selesai, machineId)
+                .sumNgPerDefectForProduct(productId, mulai, selesai, machineId, excludeWip)
                 .stream()
                 .map(r -> new ProductDetailChartDTO(
                         (String) r[0],
@@ -203,10 +208,10 @@ public class ProductSummaryService {
      */
     public Page<ProductDetailLogDTO> getDetailLogs(
             Long productId, LocalDate mulai, LocalDate selesai,
-            Long machineId, Pageable pageable) {
+            Long machineId, boolean excludeWip, Pageable pageable) {
 
         Page<Object[]> page = productionRepository
-                .findLogsForProductDetail(productId, mulai, selesai, machineId, pageable);
+                .findLogsForProductDetail(productId, mulai, selesai, machineId, excludeWip, pageable);
 
         List<ProductDetailLogDTO> list = page.getContent().stream().map(r -> {
             int  qtyOk       = toInt(r[7]);

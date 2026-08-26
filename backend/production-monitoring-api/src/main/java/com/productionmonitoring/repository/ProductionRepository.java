@@ -242,6 +242,7 @@ public interface ProductionRepository
         WHERE p.production_lot BETWEEN :mulai AND :selesai
           AND (:machineId IS NULL OR p.machine_id = :machineId)
           AND (:customerId IS NULL OR pr.customer_id = :customerId)
+          AND (NOT :excludeWip OR LOWER(m.name) <> 'wip')
           AND (
               CAST(:keyword AS TEXT) IS NULL
               OR LOWER(pr.part_no)   LIKE LOWER(CONCAT('%', :keyword, '%'))
@@ -254,6 +255,7 @@ public interface ProductionRepository
             @Param("selesai")   LocalDate selesai,
             @Param("machineId") Long machineId,
             @Param("customerId") Long customerId,
+            @Param("excludeWip") boolean excludeWip,
             @Param("keyword")   String keyword
     );
 
@@ -295,12 +297,14 @@ public interface ProductionRepository
         WHERE p.production_lot BETWEEN :mulai AND :selesai
           AND (:machineId IS NULL OR p.machine_id = :machineId)
           AND (:customerId IS NULL OR pr.customer_id = :customerId)
+          AND (NOT :excludeWip OR LOWER(m.name) <> 'wip')
         """, nativeQuery = true)
     List<Object[]> sumProductionCardsGlobal(
             @Param("mulai")     LocalDate mulai,
             @Param("selesai")   LocalDate selesai,
             @Param("machineId") Long machineId,
-            @Param("customerId") Long customerId
+            @Param("customerId") Long customerId,
+            @Param("excludeWip") boolean excludeWip
     );
 
     // ---------------------------------------------------------------------
@@ -318,9 +322,11 @@ public interface ProductionRepository
         INNER JOIN ng_defects             nd ON nd.id = qd.ng_defect_id
         INNER JOIN production_raw_reports p  ON p.id  = qd.production_id
         INNER JOIN products               pr ON pr.id = p.product_id
+        INNER JOIN machines               m  ON m.id  = p.machine_id
         WHERE p.production_lot BETWEEN :mulai AND :selesai
           AND (:machineId IS NULL OR p.machine_id = :machineId)
           AND (:customerId IS NULL OR pr.customer_id = :customerId)
+          AND (NOT :excludeWip OR LOWER(m.name) <> 'wip')
         GROUP BY nd.name
         ORDER BY total_ng DESC
         """, nativeQuery = true)
@@ -328,7 +334,8 @@ public interface ProductionRepository
             @Param("mulai")     LocalDate mulai,
             @Param("selesai")   LocalDate selesai,
             @Param("machineId") Long machineId,
-            @Param("customerId") Long customerId
+            @Param("customerId") Long customerId,
+            @Param("excludeWip") boolean excludeWip
     );
 
     // ---------------------------------------------------------------------
@@ -389,12 +396,14 @@ public interface ProductionRepository
         WHERE p.product_id = :productId
           AND p.production_lot BETWEEN :mulai AND :selesai
           AND (:machineId IS NULL OR p.machine_id = :machineId)
+          AND (NOT :excludeWip OR LOWER(m.name) <> 'wip')
         """, nativeQuery = true)
     List<Object[]> sumProductionForProductDetail(
             @Param("productId")  Long productId,
             @Param("mulai")      LocalDate mulai,
             @Param("selesai")    LocalDate selesai,
-            @Param("machineId")  Long machineId
+            @Param("machineId")  Long machineId,
+            @Param("excludeWip") boolean excludeWip
     );
 
     // ---------------------------------------------------------------------
@@ -411,9 +420,11 @@ public interface ProductionRepository
         FROM qty_defects qd
         INNER JOIN ng_defects             nd ON nd.id = qd.ng_defect_id
         INNER JOIN production_raw_reports p  ON p.id  = qd.production_id
+        INNER JOIN machines               m  ON m.id  = p.machine_id
         WHERE p.product_id = :productId
           AND p.production_lot BETWEEN :mulai AND :selesai
           AND (:machineId IS NULL OR p.machine_id = :machineId)
+          AND (NOT :excludeWip OR LOWER(m.name) <> 'wip')
         GROUP BY nd.name
         ORDER BY total_ng DESC
         """, nativeQuery = true)
@@ -421,7 +432,8 @@ public interface ProductionRepository
             @Param("productId")  Long productId,
             @Param("mulai")      LocalDate mulai,
             @Param("selesai")    LocalDate selesai,
-            @Param("machineId")  Long machineId
+            @Param("machineId")  Long machineId,
+            @Param("excludeWip") boolean excludeWip
     );
 
     // ---------------------------------------------------------------------
@@ -478,14 +490,17 @@ public interface ProductionRepository
         WHERE p.product_id = :productId
           AND p.production_lot BETWEEN :mulai AND :selesai
           AND (:machineId IS NULL OR p.machine_id = :machineId)
+          AND (NOT :excludeWip OR LOWER(m.name) <> 'wip')
         ORDER BY p.production_lot DESC
         """,
             countQuery = """
         SELECT COUNT(*)
         FROM production_raw_reports p
+        INNER JOIN machines m ON m.id = p.machine_id
         WHERE p.product_id = :productId
           AND p.production_lot BETWEEN :mulai AND :selesai
           AND (:machineId IS NULL OR p.machine_id = :machineId)
+          AND (NOT :excludeWip OR LOWER(m.name) <> 'wip')
         """,
             nativeQuery = true)
     Page<Object[]> findLogsForProductDetail(
@@ -493,6 +508,7 @@ public interface ProductionRepository
             @Param("mulai")      LocalDate mulai,
             @Param("selesai")    LocalDate selesai,
             @Param("machineId")  Long machineId,
+            @Param("excludeWip") boolean excludeWip,
             Pageable pageable
     );
 

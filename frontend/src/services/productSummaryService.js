@@ -14,6 +14,7 @@ export const getProductSummaryCards = async (params = {}) => {
       tanggalSelesai: params.tanggalSelesai,
       machineId: params.machineId || undefined,
       customerId: params.customerId || undefined,
+      excludeWip: params.excludeWip || undefined,
     },
   })
   return response.data
@@ -27,6 +28,7 @@ export const getProductSummaryChart = async (params = {}) => {
       tanggalSelesai: params.tanggalSelesai,
       machineId: params.machineId || undefined,
       customerId: params.customerId || undefined,
+      excludeWip: params.excludeWip || undefined,
     },
   })
   return response.data
@@ -40,6 +42,7 @@ export const getProductSummaryList = async (params = {}) => {
       tanggalSelesai: params.tanggalSelesai,
       machineId: params.machineId || undefined,
       customerId: params.customerId || undefined,
+      excludeWip: params.excludeWip || undefined,
       keyword: params.keyword || undefined,
       halaman: params.halaman ?? 0,
       jumlah: params.jumlah ?? 10,
@@ -61,6 +64,7 @@ export const getProductDetailCards = async (productId, params = {}) => {
       tanggalMulai: params.tanggalMulai,
       tanggalSelesai: params.tanggalSelesai,
       machineId: params.machineId || undefined,
+      excludeWip: params.excludeWip || undefined,
     },
   })
   return response.data
@@ -73,6 +77,7 @@ export const getProductDetailChart = async (productId, params = {}) => {
       tanggalMulai: params.tanggalMulai,
       tanggalSelesai: params.tanggalSelesai,
       machineId: params.machineId || undefined,
+      excludeWip: params.excludeWip || undefined,
     },
   })
   return response.data
@@ -85,6 +90,7 @@ export const getProductDetailLogs = async (productId, params = {}) => {
       tanggalMulai: params.tanggalMulai,
       tanggalSelesai: params.tanggalSelesai,
       machineId: params.machineId || undefined,
+      excludeWip: params.excludeWip || undefined,
       halaman: params.halaman ?? 0,
       jumlah: params.jumlah ?? 10,
       sortBy: params.sortBy || 'productionLot',

@@ -34,10 +34,11 @@ public class ProductSummaryController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalMulai,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalSelesai,
             @RequestParam(required = false) Long machineId,
-            @RequestParam(required = false) Long customerId
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(defaultValue = "false") boolean excludeWip
     ) {
         return ResponseEntity.ok(
-                productSummaryService.getSummaryCards(tanggalMulai, tanggalSelesai, machineId, customerId)
+                productSummaryService.getSummaryCards(tanggalMulai, tanggalSelesai, machineId, customerId, excludeWip)
         );
     }
 
@@ -50,10 +51,11 @@ public class ProductSummaryController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalMulai,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalSelesai,
             @RequestParam(required = false) Long machineId,
-            @RequestParam(required = false) Long customerId
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(defaultValue = "false") boolean excludeWip
     ) {
         return ResponseEntity.ok(
-                productSummaryService.getChartNg(tanggalMulai, tanggalSelesai, machineId, customerId)
+                productSummaryService.getChartNg(tanggalMulai, tanggalSelesai, machineId, customerId, excludeWip)
         );
     }
 
@@ -68,6 +70,7 @@ public class ProductSummaryController {
             @RequestParam(required = false) Long machineId,
             @RequestParam(required = false) Long customerId,
             @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "false") boolean excludeWip,
             @RequestParam(defaultValue = "0")            int halaman,
             @RequestParam(defaultValue = "10")           int jumlah,
             @RequestParam(defaultValue = "totalOutput")  String sortBy,
@@ -77,7 +80,7 @@ public class ProductSummaryController {
         return ResponseEntity.ok(
                 productSummaryService.getSummaryList(
                         tanggalMulai, tanggalSelesai, machineId, customerId,
-                        keyword, pageable, sortBy, sortDir)
+                        keyword, excludeWip, pageable, sortBy, sortDir)
         );
     }
 
@@ -94,11 +97,12 @@ public class ProductSummaryController {
             @PathVariable Long productId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalMulai,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalSelesai,
-            @RequestParam(required = false) Long machineId
+            @RequestParam(required = false) Long machineId,
+            @RequestParam(defaultValue = "false") boolean excludeWip
     ) {
         return ResponseEntity.ok(
                 productSummaryService.getDetailCards(
-                        productId, tanggalMulai, tanggalSelesai, machineId)
+                        productId, tanggalMulai, tanggalSelesai, machineId, excludeWip)
         );
     }
 
@@ -111,11 +115,12 @@ public class ProductSummaryController {
             @PathVariable Long productId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalMulai,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalSelesai,
-            @RequestParam(required = false) Long machineId
+            @RequestParam(required = false) Long machineId,
+            @RequestParam(defaultValue = "false") boolean excludeWip
     ) {
         return ResponseEntity.ok(
                 productSummaryService.getDetailChartNg(
-                        productId, tanggalMulai, tanggalSelesai, machineId)
+                        productId, tanggalMulai, tanggalSelesai, machineId, excludeWip)
         );
     }
 
@@ -129,13 +134,14 @@ public class ProductSummaryController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalMulai,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tanggalSelesai,
             @RequestParam(required = false) Long machineId,
+            @RequestParam(defaultValue = "false") boolean excludeWip,
             @RequestParam(defaultValue = "0")           int halaman,
             @RequestParam(defaultValue = "10")          int jumlah
     ) {
         Pageable pageable = PageRequest.of(halaman, jumlah);
         return ResponseEntity.ok(
                 productSummaryService.getDetailLogs(
-                        productId, tanggalMulai, tanggalSelesai, machineId, pageable)
+                        productId, tanggalMulai, tanggalSelesai, machineId, excludeWip, pageable)
         );
     }
 }

@@ -60,7 +60,7 @@ export default function SummaryProductCards({ cardsData, loading }) {
           <p className="text-2xl font-bold tracking-tight text-danger">
             {loading ? '...' : totalNg.toLocaleString('id-ID')}
           </p>
-          <span className="text-xs text-muted">pcs produk rijek</span>
+          <span className="text-xs text-muted">pcs produk reject</span>
         </div>
       </div>
 
@@ -110,7 +110,7 @@ export default function SummaryProductCards({ cardsData, loading }) {
           <p className="text-2xl font-bold tracking-tight text-foreground">
             {loading ? '...' : (uptimeDisplay || `${totalUptime.toLocaleString('id-ID')} mnt`)}
           </p>
-          <span className="text-xs text-muted">total mesin produksi</span>
+          <span className="text-xs text-muted">total jam mesin produksi</span>
         </div>
       </div>
     </section>
