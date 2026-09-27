@@ -16,4 +16,5 @@ public class ProductSummaryCardDTO {
     private Double totalAchieve;  // 2 desimal (ProductionCalculator.hitungAchieve), 0 jika target = 0
     private Long   totalUptime;   // menit (SUM uptime_mc)
     private String uptimeDisplay; // formatUptime(totalUptime)
+
 }

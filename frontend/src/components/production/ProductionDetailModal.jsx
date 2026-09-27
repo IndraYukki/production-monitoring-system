@@ -107,6 +107,19 @@ function ProductionDetailModal({
                 </p>
               </div>
 
+              <div>
+                <p className="text-xs uppercase text-muted">Standart Cycle Time / Take time / Cavity</p>
+                <p className="mt-1 font-medium text-info">
+                  {production.cycleTime} <span className="mt-1 font-medium text-foreground" >Second (MC) </span>
+                </p>
+                <p className="mt-1 font-medium text-info">
+                  {production.takeTime} <span className="mt-1 font-medium text-foreground" >Second (WIP)</span>
+                </p>
+                <p className="mt-1 font-medium text-info">
+                  {production.cavity} <span className="mt-1 font-medium text-foreground" >Cavity</span>
+                </p>
+              </div>
+
             </div>
 
           </section>

@@ -535,7 +535,8 @@ public interface ProductionRepository
      * [4]  shift,          [5] uptime_mc,     [6] operator1_name,
      * [7]  operator2_name, [8] operator3_name, [9] qty_ok,       [10] qty_wip,
      * [11] target,         [12] total_ng,     [13] total_output,
-     * [14] production_lot, [15] remark
+     * [14] production_lot, [15] remark,       [16] cycle_time,
+     * [17] take_time,      [18] cavity
      */
     @QueryHints(@QueryHint(name = "org.hibernate.fetchSize", value = "1000"))
     @Query(value = """
@@ -565,7 +566,10 @@ public interface ProductionRepository
             COALESCE(d.ng, 0)                                                          AS total_ng,
             COALESCE(p.qty_ok, 0) + COALESCE(p.qty_wip, 0) + COALESCE(d.ng, 0)       AS total_output,
             p.production_lot                                                           AS production_lot,
-            p.remark                                                                   AS remark
+            p.remark                                                                   AS remark,
+            COALESCE(pr.cycle_time, 0)                                                 AS cycle_time,
+            COALESCE(pr.take_time, 0)                                                  AS take_time,
+            COALESCE(pr.cavity, 0)                                                     AS cavity
         FROM production_raw_reports p
         INNER JOIN products  pr ON pr.id = p.product_id
         INNER JOIN machines  m  ON m.id  = p.machine_id

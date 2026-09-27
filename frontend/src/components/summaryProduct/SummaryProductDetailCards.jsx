@@ -14,6 +14,9 @@ export default function SummaryProductDetailCards({ cardsData, loading }) {
     totalLogsAchieve = 0,
     totalUptime = 0,
     uptimeDisplay = '',
+    cycleTime = 0,
+    takeTime = 0,
+    cavity = 0,
   } = cardsData || {}
 
   const isTargetAchieved = achievePct >= 100
@@ -163,6 +166,51 @@ export default function SummaryProductDetailCards({ cardsData, loading }) {
             {loading ? '...' : totalLogs.toLocaleString('id-ID')}
           </p>
           <span className="text-xs text-muted">{totalLogsAchieve} log mencapai target</span>
+        </div>
+      </div>
+      {/* 10. Standart Cycle Time */}
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-muted">Cycle Time</span>
+          <div className="rounded-xl bg-info/10 p-2 text-info">
+            <FileText className="size-4" />
+          </div>
+        </div>
+        <div className="mt-3">
+          <p className="text-2xl font-bold tracking-tight text-foreground">
+            {loading ? '...' : cycleTime}
+          </p>
+          <span className="text-xs text-muted">Standart Cycle Time PPIC</span>
+        </div>
+      </div>
+      {/* 11. Take Time */}
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-muted">Take Time</span>
+          <div className="rounded-xl bg-info/10 p-2 text-info">
+            <FileText className="size-4" />
+          </div>
+        </div>
+        <div className="mt-3">
+          <p className="text-2xl font-bold tracking-tight text-foreground">
+            {loading ? '...' : takeTime}
+          </p>
+          <span className="text-xs text-muted">Standart Take Time PPIC</span>
+        </div>
+      </div>
+      {/* 12. Cavity */}
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-muted">Cavity</span>
+          <div className="rounded-xl bg-info/10 p-2 text-info">
+            <FileText className="size-4" />
+          </div>
+        </div>
+        <div className="mt-3">
+          <p className="text-2xl font-bold tracking-tight text-foreground">
+            {loading ? '...' : cavity}
+          </p>
+          <span className="text-xs text-muted">Standart Cavity PPIC</span>
         </div>
       </div>
     </section>

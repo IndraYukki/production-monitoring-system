@@ -25,4 +25,7 @@ public class ProductDetailCardDTO {
     private long   totalLogsAchieve;
     private Long   totalUptime;
     private String uptimeDisplay; // formatUptime(totalUptime)
+    private Integer cycleTime = 0;
+    private Integer cavity = 0;
+    private Integer takeTime = 0;
 }

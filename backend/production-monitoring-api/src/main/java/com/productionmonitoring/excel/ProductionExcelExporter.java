@@ -20,7 +20,8 @@ public class ProductionExcelExporter {
      * [4]  shift,          [5] uptime_mc,     [6] operator1_name,
      * [7]  operator2_name, [8] operator3_name, [9] qty_ok,       [10] qty_wip,
      * [11] target,         [12] total_ng,     [13] total_output,
-     * [14] production_lot, [15] remark
+     * [14] production_lot, [15] remark,       [16] cycle_time,
+     * [17] take_time,      [18] cavity
      *
      * Achieve %, NG Rate %, dan Status dihitung di sini lewat
      * ProductionCalculator (overload agregat) — TIDAK diduplikasi di SQL.
@@ -52,8 +53,11 @@ public class ProductionExcelExporter {
                 "Achievement %",  // 14
                 "NG Rate %",      // 15
                 "Status",         // 16
-                "Production Lot", // 17
-                "Remark"          // 18
+                "Production Lot",       // 17
+                "Standard Cycle Time",  // 18
+                "Take Time",            // 19
+                "Cavity",               // 20
+                "Remark"                // 21  (paling akhir — isinya bisa panjang)
         };
 
         for (int i = 0; i < headers.length; i++) {
@@ -101,7 +105,10 @@ public class ProductionExcelExporter {
             row.createCell(17).setCellValue(
                     r[14] == null ? "" : r[14].toString()
             );
-            row.createCell(18).setCellValue(
+            row.createCell(18).setCellValue(((Number) r[16]).doubleValue()); // standar cycle time (detik)
+            row.createCell(19).setCellValue(((Number) r[17]).doubleValue()); // take time (detik, WIP)
+            row.createCell(20).setCellValue(((Number) r[18]).doubleValue()); // cavity
+            row.createCell(21).setCellValue(
                     r[15] == null ? "" : (String) r[15]
             );
         }

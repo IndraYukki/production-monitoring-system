@@ -53,7 +53,8 @@ public class ProductSummaryService {
         return new ProductSummaryCardDTO(
                 totalOutput, totalTarget, totalNg, ngRate, achieve,
                 totalUptime,
-                ProductionCalculator.formatUptime((int) totalUptime));
+                ProductionCalculator.formatUptime((int) totalUptime)
+                );
     }
 
     /**
@@ -182,8 +183,10 @@ public class ProductSummaryService {
                 totalLogs,
                 totalLogsAchieve,
                 totalUptime,
-                ProductionCalculator.formatUptime((int) totalUptime)
-        );
+                ProductionCalculator.formatUptime((int) totalUptime),
+                product.getCycleTime(),
+                product.getCavity(),
+                product.getTakeTime());
     }
 
     /**
@@ -278,7 +281,10 @@ public class ProductSummaryService {
                 product.getPartNo(),
                 product.getPartName(),
                 product.getCustomer() != null ? product.getCustomer().getCustomer() : "",
-                0L, 0L, 0L, 0L, 0L, 0.0, 0.0, 0L, 0L, 0L, "0 menit"
+                0L, 0L, 0L, 0L, 0L, 0.0, 0.0, 0L, 0L, 0L, "0 menit",
+                product.getCycleTime(),
+                product.getCavity(),
+                product.getTakeTime()
         );
     }
 
